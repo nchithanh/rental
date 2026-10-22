@@ -61,6 +61,66 @@ const ROWS: Row[] = [
   { name: "Kia Carnival Signature 2.2 2023", rent: 2401000, imageUrl: "https://n1-pstg.mioto.vn/cho_thue_xe_o_to_tu_lai_thue_xe_du_lich_hochiminh/kia_carnival_signature_2.2_2023/p/g/2025/05/12/09/2XAANXUCEz0nYMv2z3-1ow.jpg", size: "8 chỗ", color: "Số tự động", category: "Xe" },
 ];
 
+function parseBrandYear(name: string): { brand: string; year: string } {
+  const yearM = name.match(/\b(20\d{2})\b/);
+  const year = yearM?.[1] ?? "—";
+  const brand = name.replace(/\b20\d{2}\b/, "").trim().split(/\s+/)[0] || "—";
+  return { brand, year };
+}
+
+const AMENITY_POOL = [
+  "Bản đồ",
+  "Bluetooth",
+  "Camera hành trình",
+  "Camera lùi",
+  "Định vị GPS",
+  "Lốp dự phòng",
+  "ETC",
+  "Túi khí an toàn",
+  "Cảm biến áp suất lốp",
+  "Sạc không dây",
+];
+
+function vehicleAttrs(
+  row: Row,
+  i: number,
+  brand: string,
+  year: string,
+  fuel: string,
+): Record<string, string> {
+  const transmission = row.color === "—" ? "Số tự động" : row.color;
+  const consumption =
+    fuel === "Điện"
+      ? `${14 + (i % 5)} kWh/100km`
+      : fuel === "Hybrid"
+        ? `${5 + (i % 3)}.${i % 9}L/100km`
+        : `${7 + (i % 5)}L/100km`;
+  const amenityCount = 6 + (i % 5);
+  const amenities = AMENITY_POOL.slice(0, amenityCount).join(" · ");
+  const freeCollateral = i % 3 === 0;
+  return {
+    transmission,
+    seats: row.size,
+    fuel,
+    consumption,
+    brand,
+    year,
+    delivery: i % 3 === 0 ? "Giao tận nơi (nội thành)" : "Nhận tại showroom",
+    description:
+      fuel === "Điện"
+        ? `Xe điện ${brand} · tiêu hao khoảng ${consumption}. Xe đẹp, bảo dưỡng định kỳ tại hãng. Khách thuê dài hạn vui lòng liên hệ Showroom thuê xe Dolphin.`
+        : `Đô thị ~${consumption}, đường trường tiết kiệm hơn. Xe biển vàng kinh doanh, an toàn, bảo dưỡng thường xuyên. Nhu cầu thuê dài hạn liên hệ showroom nhé.`,
+    amenities,
+    document_opt1: "GPLX (đối chiếu) & Passport (giữ lại)",
+    document_opt2: "GPLX (đối chiếu) & CCCD (đối chiếu VNeID)",
+    collateral: freeCollateral
+      ? "Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy"
+      : "Thế chấp GPLX + CCCD đối chiếu · hoặc cọc tiền mặt theo thỏa thuận",
+    terms:
+      "Khách tự đổ nhiên liệu / sạc đủ khi trả xe. Phạt trễ giờ theo bảng giá showroom. Không hút thuốc trong xe. Hư hỏng do lỗi khách sẽ tính theo báo giá sửa chữa.",
+  };
+}
+
 export function buildSeedVehicles(): Garment[] {
   return ROWS.map((row, i) => {
     const n = i + 1;
@@ -69,6 +129,10 @@ export function buildSeedVehicles(): Garment[] {
       Math.round((row.rent * 1.5) / 50_000) * 50_000,
     );
     const day = String((i % 28) + 1).padStart(2, "0");
+    const { brand, year } = parseBrandYear(row.name);
+    const fuel =
+      row.category === "Xe" || row.category === "—" ? "Xăng" : row.category;
+    const attrs = vehicleAttrs(row, i, brand, year, fuel);
     return {
       id: `g${n}`,
       code: `XE-${String(n).padStart(3, "0")}`,
@@ -76,8 +140,9 @@ export function buildSeedVehicles(): Garment[] {
       emoji: "🚗",
       imageUrl: row.imageUrl,
       size: row.size,
-      color: row.color,
-      category: row.category,
+      color: attrs.transmission,
+      category: fuel,
+      attrs,
       rentPrice: row.rent,
       depositDefault: deposit,
       status: "ready" as GarmentStatus,

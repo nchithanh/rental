@@ -16,7 +16,7 @@ import type {
 } from "@/types";
 
 /** Bump để force re-seed demo khi đổi data. */
-export const SEED_VERSION = "5";
+export const SEED_VERSION = "7";
 
 const ALL_PERMS = {
   "trang-phuc": true,
@@ -74,12 +74,19 @@ export async function ensureSeeded(): Promise<void> {
 
   const settings: StoreSettings = {
     id: "store",
-    name: isXe ? "Dolphin Thuê Xe" : "Dolphin Studio Thuê",
+    name: isXe
+      ? "Showroom thuê xe Dolphin"
+      : "Dolphin Studio Váy & Vest",
     slogan: isXe
-      ? "Cho thuê xe — nhận · trả · cọc & bảo hiểm rõ"
-      : "Cho thuê trang phục — nhận · trả · cọc rõ ràng",
-    address: "12 Nguyễn Huệ, Quận 1, TP.HCM",
-    phone: "0901234567",
+      ? "Xe tự lái & có tài — giao tận nơi · cọc & bảo hiểm minh bạch"
+      : "Boutique cho thuê váy · vest · áo dài — nhận · trả · cọc rõ ràng",
+    address: isXe
+      ? "88 Nguyễn Văn Linh, Quận 7, TP.HCM"
+      : "12 Nguyễn Huệ, Quận 1, TP.HCM",
+    phone: isXe ? "0909888777" : "0901234567",
+    email: isXe
+      ? "thuexe@dolphin-software.io.vn"
+      : "studio@dolphin-software.io.vn",
     zaloNotifyEnabled: false,
     websiteShowcaseTodo: true,
   };

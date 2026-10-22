@@ -17,6 +17,7 @@ Hai lĩnh vực demo, IndexedDB tách:
 - `fe/lib/vertical.ts` — options + copy + `setVertical`
 - `fe/lib/db.ts` — tên DB theo vertical
 - Seed: `seed-garments.ts` (marketplace trang phục) / `seed-vehicles.ts` (48 xe demo + ảnh CDN) · `SEED_VERSION` trong `seed.ts`
+- Thuộc tính: `fe/lib/attribute-defs.ts` — nhóm specs/description/amenities/documents/collateral/terms (`text`|`long`|`chips`); filterable map size/color/category
 - Nav: `getNavGroups(vertical)`
 
-Brand chrome chung `#5D5CC4`.
+Brand demo: **Dolphin Studio Váy & Vest** · **Showroom thuê xe Dolphin**. Chrome `#5D5CC4`.

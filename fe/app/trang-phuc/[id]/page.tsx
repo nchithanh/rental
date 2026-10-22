@@ -7,10 +7,17 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { ShowcaseAttrList } from "@/components/showcase-attrs";
+import {
+  attrsFromForm,
+  getAttrValue,
+  getAttributeDefs,
+} from "@/lib/attribute-defs";
 import { db, GARMENT_STATUS_LABEL, ORDER_STATUS_LABEL } from "@/lib/db";
 import { garmentStatusTone, orderStatusTone } from "@/lib/labels";
 import { cn, formatDateTime, formatVnd, uid } from "@/lib/utils";
 import { notify } from "@/lib/notify";
+import { useVertical, useVerticalCopy } from "@/lib/vertical";
 import type { GarmentStatus } from "@/types";
 
 export default function GarmentDetailPage({
@@ -19,6 +26,9 @@ export default function GarmentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const vertical = useVertical();
+  const copy = useVerticalCopy();
+  const attrDefs = getAttributeDefs(vertical);
   const garment = useLiveQuery(() => db.garments.get(id), [id]);
   const events = useLiveQuery(
     () =>
@@ -37,31 +47,31 @@ export default function GarmentDetailPage({
   const [form, setForm] = useState({
     name: "",
     code: "",
-    size: "",
-    color: "",
-    category: "",
     rentPrice: "",
     depositDefault: "",
     imageUrl: "",
     emoji: "",
     note: "",
+    attrs: {} as Record<string, string>,
   });
 
   useEffect(() => {
     if (!garment) return;
+    const attrs: Record<string, string> = {};
+    for (const def of getAttributeDefs(vertical)) {
+      attrs[def.key] = getAttrValue(garment, def);
+    }
     setForm({
       name: garment.name,
       code: garment.code,
-      size: garment.size,
-      color: garment.color,
-      category: garment.category,
       rentPrice: String(garment.rentPrice),
       depositDefault: String(garment.depositDefault),
       imageUrl: garment.imageUrl ?? "",
-      emoji: garment.emoji ?? "👗",
+      emoji: garment.emoji ?? copy.emojiFallback,
       note: garment.note ?? "",
+      attrs,
     });
-  }, [garment]);
+  }, [garment, vertical, copy.emojiFallback]);
 
   const setStatus = async (status: GarmentStatus) => {
     if (!garment) return;
@@ -93,16 +103,18 @@ export default function GarmentDetailPage({
 
   const saveEdit = async () => {
     if (!garment) return;
+    const mapped = attrsFromForm(vertical, form.attrs);
     await db.garments.update(id, {
       name: form.name.trim(),
       code: form.code.trim().toUpperCase(),
-      size: form.size.trim(),
-      color: form.color.trim(),
-      category: form.category.trim(),
+      size: mapped.size,
+      color: mapped.color,
+      category: mapped.category,
+      attrs: mapped.attrs,
       rentPrice: Number(form.rentPrice) || 0,
       depositDefault: Number(form.depositDefault) || 0,
       imageUrl: form.imageUrl.trim() || undefined,
-      emoji: form.emoji || "👗",
+      emoji: form.emoji || copy.emojiFallback,
       note: form.note.trim() || undefined,
     });
     await db.garmentEvents.add({
@@ -112,14 +124,14 @@ export default function GarmentDetailPage({
       note: "Cập nhật thông tin / giá thuê",
       createdAt: new Date().toISOString(),
     });
-    notify.success("Đã lưu trang phục");
+    notify.success(`Đã lưu ${copy.assetSingular}`);
     setEditing(false);
   };
 
   if (!garment) {
     return (
       <AppShell>
-        <p className="text-slate-500">Không tìm thấy trang phục.</p>
+        <p className="text-slate-500">Không tìm thấy {copy.assetSingular}.</p>
         <Link href="/trang-phuc" className="text-[var(--brand-600)]">
           ← Danh sách
         </Link>
@@ -137,7 +149,7 @@ export default function GarmentDetailPage({
           href="/trang-phuc"
           className="text-sm font-semibold text-[var(--brand-600)]"
         >
-          ← Trang phục
+          ← {copy.catalog}
         </Link>
         <Button size="sm" variant="outline" onClick={() => setEditing((v) => !v)}>
           {editing ? "Huỷ sửa" : "Sửa"}
@@ -154,7 +166,9 @@ export default function GarmentDetailPage({
               className="h-full w-full object-cover"
             />
           ) : (
-            <span className="text-6xl">{garment.emoji ?? "👗"}</span>
+            <span className="text-6xl">
+              {garment.emoji ?? copy.emojiFallback}
+            </span>
           )}
         </div>
         <div className="p-4">
@@ -162,9 +176,6 @@ export default function GarmentDetailPage({
             <div>
               <p className="text-xs text-slate-400">{garment.code}</p>
               <h1 className="text-xl font-bold">{garment.name}</h1>
-              <p className="text-sm text-slate-500">
-                Size {garment.size} · {garment.color} · {garment.category}
-              </p>
             </div>
             <span
               className={cn(
@@ -182,6 +193,9 @@ export default function GarmentDetailPage({
           {garment.note ? (
             <p className="mt-1 text-sm text-slate-500">{garment.note}</p>
           ) : null}
+          <div className="mt-3">
+            <ShowcaseAttrList item={garment} />
+          </div>
         </div>
       </Card>
 
@@ -199,21 +213,21 @@ export default function GarmentDetailPage({
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Tên"
             />
-            <Input
-              value={form.size}
-              onChange={(e) => setForm({ ...form, size: e.target.value })}
-              placeholder="Size"
-            />
-            <Input
-              value={form.color}
-              onChange={(e) => setForm({ ...form, color: e.target.value })}
-              placeholder="Màu"
-            />
-            <Input
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-              placeholder="Danh mục"
-            />
+            {attrDefs
+              .filter((d) => (d.kind ?? "text") === "text")
+              .map((def) => (
+                <Input
+                  key={def.key}
+                  value={form.attrs[def.key] ?? ""}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      attrs: { ...form.attrs, [def.key]: e.target.value },
+                    })
+                  }
+                  placeholder={def.label}
+                />
+              ))}
             <Input
               value={form.emoji}
               onChange={(e) => setForm({ ...form, emoji: e.target.value })}
@@ -234,6 +248,27 @@ export default function GarmentDetailPage({
               placeholder="Cọc"
             />
           </div>
+          {attrDefs
+            .filter((d) => d.kind === "long" || d.kind === "chips")
+            .map((def) => (
+              <textarea
+                key={def.key}
+                className="w-full rounded-[10px] border px-3 py-2 text-sm"
+                rows={def.kind === "chips" ? 2 : 3}
+                value={form.attrs[def.key] ?? ""}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    attrs: { ...form.attrs, [def.key]: e.target.value },
+                  })
+                }
+                placeholder={
+                  def.kind === "chips"
+                    ? `${def.label} (cách nhau bởi · )`
+                    : def.label
+                }
+              />
+            ))}
           <Input
             value={form.imageUrl}
             onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}

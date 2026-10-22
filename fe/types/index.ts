@@ -72,9 +72,12 @@ export interface Garment {
   name: string;
   imageUrl?: string;
   emoji?: string;
+  /** Field lõi — map từ thuộc tính filterable (size/chỗ, màu/hộp số, loại/nhiên liệu). */
   size: string;
   color: string;
   category: string;
+  /** Thuộc tính mở rộng theo lĩnh vực (xem `lib/attribute-defs.ts`). */
+  attrs?: Record<string, string>;
   rentPrice: number;
   depositDefault: number;
   status: GarmentStatus;

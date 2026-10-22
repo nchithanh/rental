@@ -7,10 +7,15 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  attrsFromForm,
+  getAttributeDefs,
+} from "@/lib/attribute-defs";
 import { db, GARMENT_STATUS_LABEL } from "@/lib/db";
 import { garmentStatusTone } from "@/lib/labels";
 import { cn, formatVnd, uid } from "@/lib/utils";
 import { notify } from "@/lib/notify";
+import { useVertical, useVerticalCopy } from "@/lib/vertical";
 import type { GarmentStatus } from "@/types";
 
 const STATUSES: (GarmentStatus | "all")[] = [
@@ -23,24 +28,63 @@ const STATUSES: (GarmentStatus | "all")[] = [
   "repair",
 ];
 
-const emptyForm = {
-  code: "",
-  name: "",
-  size: "M",
-  color: "",
-  category: "Váy",
-  rentPrice: "1000000",
-  depositDefault: "1500000",
-  imageUrl: "",
-  emoji: "👗",
-};
+function defaultAttrValues(
+  vertical: "trang-phuc" | "thue-xe",
+): Record<string, string> {
+  if (vertical === "thue-xe") {
+    return {
+      transmission: "Số tự động",
+      seats: "5 chỗ",
+      fuel: "Xăng",
+      consumption: "8L/100km",
+      brand: "",
+      year: "2024",
+      delivery: "Nhận tại showroom",
+      description: "",
+      amenities:
+        "Bản đồ · Bluetooth · Camera hành trình · Camera lùi · Định vị GPS · Lốp dự phòng · ETC · Túi khí an toàn",
+      document_opt1: "GPLX (đối chiếu) & Passport (giữ lại)",
+      document_opt2: "GPLX (đối chiếu) & CCCD (đối chiếu VNeID)",
+      collateral:
+        "Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy",
+      terms: "",
+    };
+  }
+  return {
+    size: "M",
+    color: "",
+    category: "Váy",
+    material: "",
+    style: "",
+    occasion: "",
+    brand_label: "",
+    length: "Midi",
+    description: "",
+    amenities: "Túi nhỏ · Thắt lưng",
+    document_opt1: "CCCD (đối chiếu) & đặt cọc theo bảng giá",
+    document_opt2: "Passport (giữ lại) & đặt cọc theo bảng giá",
+    collateral: "Cọc tiền mặt hoặc CK bằng giá cọc mặc định",
+    terms: "",
+  };
+}
 
 export default function GarmentsPage() {
+  const vertical = useVertical();
+  const copy = useVerticalCopy();
+  const attrDefs = getAttributeDefs(vertical);
   const garments = useLiveQuery(() => db.garments.orderBy("code").toArray());
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<(typeof STATUSES)[number]>("all");
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState({
+    code: "",
+    name: "",
+    rentPrice: "1000000",
+    depositDefault: "1500000",
+    imageUrl: "",
+    emoji: copy.emojiFallback,
+    attrs: defaultAttrValues(vertical),
+  });
 
   const counts = useMemo(() => {
     const m: Record<string, number> = { all: 0 };
@@ -74,15 +118,17 @@ export default function GarmentsPage() {
       return;
     }
     const id = uid("g");
+    const mapped = attrsFromForm(vertical, form.attrs);
     await db.garments.add({
       id,
       code: form.code.trim().toUpperCase(),
       name: form.name.trim(),
-      emoji: form.emoji || "👗",
+      emoji: form.emoji || copy.emojiFallback,
       imageUrl: form.imageUrl.trim() || undefined,
-      size: form.size,
-      color: form.color || "—",
-      category: form.category,
+      size: mapped.size,
+      color: mapped.color,
+      category: mapped.category,
+      attrs: mapped.attrs,
       rentPrice: Number(form.rentPrice) || 0,
       depositDefault: Number(form.depositDefault) || 0,
       status: "ready",
@@ -93,21 +139,29 @@ export default function GarmentsPage() {
       id: uid("evt"),
       garmentId: id,
       type: "created",
-      note: "Thêm trang phục",
+      note: `Thêm ${copy.assetSingular}`,
       createdAt: new Date().toISOString(),
     });
-    notify.success("Đã thêm trang phục");
+    notify.success(`Đã thêm ${copy.assetSingular}`);
     setAdding(false);
-    setForm(emptyForm);
+    setForm({
+      code: "",
+      name: "",
+      rentPrice: "1000000",
+      depositDefault: "1500000",
+      imageUrl: "",
+      emoji: copy.emojiFallback,
+      attrs: defaultAttrValues(vertical),
+    });
   };
 
   return (
     <AppShell>
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-bold">Trang phục</h1>
+          <h1 className="text-lg font-bold">{copy.catalog}</h1>
           <p className="text-sm text-slate-500">
-            Hình · mã · size · màu · giá thuê · tình trạng
+            Hình · mã · thuộc tính · giá thuê · tình trạng
           </p>
         </div>
         <Button size="sm" onClick={() => setAdding((v) => !v)}>
@@ -119,7 +173,7 @@ export default function GarmentsPage() {
         <Card className="mb-4 space-y-2 p-4">
           <div className="grid grid-cols-2 gap-2">
             <Input
-              placeholder="Mã đồ"
+              placeholder="Mã"
               value={form.code}
               onChange={(e) => setForm({ ...form, code: e.target.value })}
             />
@@ -128,21 +182,21 @@ export default function GarmentsPage() {
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
-            <Input
-              placeholder="Size"
-              value={form.size}
-              onChange={(e) => setForm({ ...form, size: e.target.value })}
-            />
-            <Input
-              placeholder="Màu"
-              value={form.color}
-              onChange={(e) => setForm({ ...form, color: e.target.value })}
-            />
-            <Input
-              placeholder="Danh mục"
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-            />
+            {attrDefs
+              .filter((d) => (d.kind ?? "text") === "text")
+              .map((def) => (
+                <Input
+                  key={def.key}
+                  placeholder={def.label}
+                  value={form.attrs[def.key] ?? ""}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      attrs: { ...form.attrs, [def.key]: e.target.value },
+                    })
+                  }
+                />
+              ))}
             <Input
               placeholder="Emoji"
               value={form.emoji}
@@ -163,13 +217,34 @@ export default function GarmentsPage() {
               }
             />
           </div>
+          {attrDefs
+            .filter((d) => d.kind === "long" || d.kind === "chips")
+            .map((def) => (
+              <textarea
+                key={def.key}
+                className="w-full rounded-[10px] border px-3 py-2 text-sm"
+                rows={def.kind === "chips" ? 2 : 3}
+                placeholder={
+                  def.kind === "chips"
+                    ? `${def.label} (cách nhau bởi · )`
+                    : def.label
+                }
+                value={form.attrs[def.key] ?? ""}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    attrs: { ...form.attrs, [def.key]: e.target.value },
+                  })
+                }
+              />
+            ))}
           <Input
             placeholder="URL hình ảnh (tuỳ chọn)"
             value={form.imageUrl}
             onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
           />
           <Button className="w-full" onClick={() => void onAdd()}>
-            Lưu trang phục
+            Lưu {copy.assetSingular}
           </Button>
         </Card>
       ) : null}

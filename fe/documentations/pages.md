@@ -15,6 +15,7 @@
 | `/thanh-toan` | Tổng cọc/còn thu + lọc ledger |
 | `/bao-cao` | DT ngày/tháng · list overdue |
 | `/cham-soc` | Nhắc · Zalo deep-link |
-| `/showcase` | Public catalog + form (no auth) |
+| `/showcase` | Public catalog: filter · CTA đặt thuê · form (no auth) |
+| `/showcase/[id]` | Public detail + thuộc tính theo vertical + đặt lịch |
 | `/cai-dat` | Tên studio |
 | `/menu` | Lưới nav mobile |

@@ -9,6 +9,10 @@ import { Input } from "@/components/ui/input";
 import { db, getDbName } from "@/lib/db";
 import { notify } from "@/lib/notify";
 import {
+  getAttributeDefs,
+  getAttributeGroups,
+} from "@/lib/attribute-defs";
+import {
   VERTICAL_OPTIONS,
   setVertical,
   useVertical,
@@ -93,7 +97,7 @@ export default function SettingsPage() {
 
       <Card className="space-y-3 p-4">
         <Input
-          placeholder="Tên cửa hàng"
+          placeholder="Tên cửa hàng / showroom"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
@@ -115,6 +119,53 @@ export default function SettingsPage() {
         <Button className="w-full" onClick={() => void save()}>
           Lưu
         </Button>
+      </Card>
+
+      <Card className="mt-4 space-y-3 p-4">
+        <p className="text-sm font-semibold">Thuộc tính lĩnh vực</p>
+        <p className="text-xs text-slate-500">
+          Mỗi lĩnh vực có bộ thuộc tính theo nhóm (đặc điểm, mô tả, tiện nghi,
+          giấy tờ, thế chấp, điều khoản). Tạm hardcode — TODO: CRUD sau.
+        </p>
+        {getAttributeGroups(vertical).map((group) => (
+          <div key={group.id}>
+            <p className="mb-1.5 text-xs font-bold text-slate-500">
+              {group.label}
+              {group.hint ? (
+                <span className="ml-1 font-normal text-slate-400">
+                  · {group.hint}
+                </span>
+              ) : null}
+            </p>
+            <ul className="space-y-1">
+              {getAttributeDefs(vertical)
+                .filter((d) => d.group === group.id)
+                .map((def) => (
+                  <li
+                    key={def.key}
+                    className="flex items-center justify-between rounded-[10px] border border-slate-100 px-3 py-2 text-sm dark:border-slate-800"
+                  >
+                    <span>
+                      <span className="font-semibold">{def.label}</span>
+                      <span className="ml-2 text-[11px] text-slate-400">
+                        {def.key}
+                        {def.kind && def.kind !== "text"
+                          ? ` · ${def.kind}`
+                          : ""}
+                      </span>
+                    </span>
+                    {def.filterable ? (
+                      <span className="rounded-full bg-[var(--brand-50)] px-2 py-0.5 text-[10px] font-bold text-[var(--brand-600)]">
+                        Filter
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-slate-400">Chi tiết</span>
+                    )}
+                  </li>
+                ))}
+            </ul>
+          </div>
+        ))}
       </Card>
 
       <Card className="mt-4 p-4 text-sm text-slate-500">

@@ -61,6 +61,26 @@ const ROWS: Row[] = [
   { name: "Váy lông trắng - sz M", rent: 200000, file: "a53e8194-c2a9-4b36-a8c8-4a370fadd458.webp", size: "M", category: "Váy" },
 ];
 
+const MATERIALS = ["Voan", "Ren", "Lụa", "Tuyết mưa", "Cotton", "Nhung"];
+const STYLES = ["Tiểu thư", "Tối giản", "Sang trọng", "Vintage", "Hàn Quốc"];
+const OCCASIONS: Record<string, string> = {
+  Váy: "Dự tiệc / cocktail",
+  Set: "Sự kiện · chụp ảnh",
+  Jumpsuit: "Party · đi chơi",
+  Áo: "Phối đồ dự tiệc",
+};
+const LENGTHS = ["Ngắn", "Midi", "Dài", "Maxi"];
+const COLORS = ["Trắng", "Đen", "Be", "Hồng", "Xanh navy", "Đỏ rượu"];
+const ACCESSORY_POOL = [
+  "Túi nhỏ",
+  "Thắt lưng",
+  "Khăn choàng",
+  "Găng tay",
+  "Kẹp tóc",
+  "Áo choàng mỏng",
+  "Giày (thuê riêng)",
+];
+
 export function buildSeedGarments(): Garment[] {
   return ROWS.map((row, i) => {
     const n = i + 1;
@@ -69,6 +89,32 @@ export function buildSeedGarments(): Garment[] {
       Math.round((row.rent * 1.25) / 50_000) * 50_000,
     );
     const day = String((i % 28) + 1).padStart(2, "0");
+    const color = COLORS[i % COLORS.length];
+    const material = MATERIALS[i % MATERIALS.length];
+    const style = STYLES[i % STYLES.length];
+    const occasion = OCCASIONS[row.category] ?? "Thuê ngày lễ";
+    const brandLabel = row.name.split(/\s+/)[0] || "Boutique";
+    const amenities = ACCESSORY_POOL.slice(0, 3 + (i % 4)).join(" · ");
+    const attrs: Record<string, string> = {
+      size: row.size,
+      color,
+      category: row.category,
+      material,
+      style,
+      occasion,
+      brand_label: brandLabel,
+      length: LENGTHS[i % LENGTHS.length],
+      description: `${row.category} ${style.toLowerCase()} · chất liệu ${material.toLowerCase()}. Phù hợp ${occasion.toLowerCase()}. Giặt khô / hấp theo hướng dẫn studio trước khi trả.`,
+      amenities,
+      document_opt1: "CCCD (đối chiếu) & đặt cọc theo bảng giá",
+      document_opt2: "Passport (giữ lại) & đặt cọc theo bảng giá",
+      collateral:
+        i % 4 === 0
+          ? "Cọc bằng chuyển khoản · không giữ xe máy"
+          : "Cọc tiền mặt hoặc CK bằng giá cọc mặc định trên phiếu",
+      terms:
+        "Không tự ý chỉnh sửa / cắt may. Bồi thường nếu rách, ố không khắc phục được. Trả muộn tính phí theo ngày. Studio hỗ trợ chỉnh fit nhẹ trong giờ nhận đồ.",
+    };
     return {
       id: `g${n}`,
       code: `TD-${String(n).padStart(3, "0")}`,
@@ -76,8 +122,9 @@ export function buildSeedGarments(): Garment[] {
       emoji: "👗",
       imageUrl: `${IMG}${row.file}`,
       size: row.size,
-      color: "—",
+      color,
       category: row.category,
+      attrs,
       rentPrice: row.rent,
       depositDefault: deposit,
       status: "ready" as GarmentStatus,
