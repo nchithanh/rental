@@ -21,7 +21,7 @@ Workflow: `.github/workflows/build.yml`
 
 | | |
 | --- | --- |
-| Trigger | `push` / `pull_request` → `main` |
+| Trigger | `push` / `pull_request` → `main` · `workflow_dispatch` (Run workflow) |
 | Working dir | `fe/` |
 | Steps | Node 20 · `npm ci` · `npm run build` |
 
