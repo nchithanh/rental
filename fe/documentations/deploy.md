@@ -5,17 +5,16 @@ Repo `nchithanh/rental` · app `fe/`.
 | Kênh | Vai trò |
 | --- | --- |
 | **GitHub Pages** | Static export qua Actions (`/rental` basePath) |
-| **GitHub Actions Build** | CI check `npm run build` (server) — không deploy |
 | **Vercel** (tuỳ chọn) | Next.js server nếu import project riêng |
 
 ## GitHub Pages (Actions)
 
-Workflow: `.github/workflows/deploy-pages.yml`
+Workflow: `.github/workflows/build.yml` — tên UI **Build and deploy Pages**
 
 | | |
 | --- | --- |
-| Trigger | `push` → `main` · `workflow_dispatch` |
-| Build | `fe/`: `npm ci` · `npm run build:pages` |
+| Trigger | `push` → `main` · `workflow_dispatch` · PR chỉ CI `npm run build` |
+| Build (main) | `fe/`: `npm ci` · `npm run build:pages` |
 | Env | `GITHUB_PAGES=true` · `GITHUB_PAGES_BASE_PATH=/rental` |
 | Output | `fe/out` → Deploy Pages |
 
@@ -23,14 +22,11 @@ Workflow: `.github/workflows/deploy-pages.yml`
 
 1. **Settings → Pages** → Source: **GitHub Actions**
 2. (Nếu cần) **Settings → Actions → General** → Allow actions
+3. **Actions** → **Build and deploy Pages** → **Run workflow** (nếu push không tự chạy)
 
 ### URL
 
 `https://nchithanh.github.io/rental/`
-
-## CI build (không Pages)
-
-`.github/workflows/build.yml` — Node 20 · `npm ci` · `npm run build` (push/PR `main` + manual).
 
 ## Local
 
