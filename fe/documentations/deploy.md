@@ -1,45 +1,44 @@
 # Deploy — Dolphin Rental FE
 
-**Vercel** (Next.js) · repo `nchithanh/rental` · app directory `fe/`.
+Repo `nchithanh/rental` · app `fe/`.
 
-Deploy production: Vercel. CI check: GitHub Actions (build only, không Pages).
+| Kênh | Vai trò |
+| --- | --- |
+| **GitHub Pages** | Static export qua Actions (`/rental` basePath) |
+| **GitHub Actions Build** | CI check `npm run build` (server) — không deploy |
+| **Vercel** (tuỳ chọn) | Next.js server nếu import project riêng |
 
-## Vercel (1 lần)
+## GitHub Pages (Actions)
 
-1. [vercel.com](https://vercel.com) → **Add New Project** → Import GitHub `nchithanh/rental`
-2. **Root Directory:** `fe`
-3. Framework Preset: **Next.js** (đọc `fe/vercel.json`)
-4. Install / Build: `npm ci` / `npm run build` (mặc định trong `vercel.json`)
-5. Deploy → URL dạng `https://<project>.vercel.app/`
-6. (Tuỳ chọn) Settings → Domains → gắn custom domain
-
-Push `main` sau đó → Vercel auto-deploy (Git Integration).
-
-## GitHub Actions (CI build)
-
-Workflow: `.github/workflows/build.yml`
+Workflow: `.github/workflows/deploy-pages.yml`
 
 | | |
 | --- | --- |
-| Trigger | `push` / `pull_request` → `main` · `workflow_dispatch` (Run workflow) |
-| Working dir | `fe/` |
-| Steps | Node 20 · `npm ci` · `npm run build` |
+| Trigger | `push` → `main` · `workflow_dispatch` |
+| Build | `fe/`: `npm ci` · `npm run build:pages` |
+| Env | `GITHUB_PAGES=true` · `GITHUB_PAGES_BASE_PATH=/rental` |
+| Output | `fe/out` → Deploy Pages |
 
-Chỉ kiểm tra build xanh; **không** publish GitHub Pages / artifact static.
+### Bật 1 lần trên GitHub
 
-## Build env
+1. **Settings → Pages** → Source: **GitHub Actions**
+2. (Nếu cần) **Settings → Actions → General** → Allow actions
 
-| Env | Khi nào |
-| --- | --- |
-| *(trống)* | Production Vercel / `npm run build` — Next.js server, **không** `basePath`, PWA bật (prod) |
-| `GITHUB_PAGES=true` + `GITHUB_PAGES_BASE_PATH` | Chỉ local optional (`npm run build:pages`) — static `out/`; **không** dùng cho Vercel / CI |
+### URL
+
+`https://nchithanh.github.io/rental/`
+
+## CI build (không Pages)
+
+`.github/workflows/build.yml` — Node 20 · `npm ci` · `npm run build` (push/PR `main` + manual).
 
 ## Local
 
 ```bash
 cd fe
-npm run dev          # :3013
-npm run build && npm start
+npm run dev                 # :3013
+npm run build && npm start  # server
+npm run build:pages         # → out/ (static, basePath /rental)
 ```
 
 ## Push
@@ -47,7 +46,3 @@ npm run build && npm start
 ```bash
 GIT_SSH_COMMAND='ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes' git push origin main
 ```
-
-## Tắt GitHub Pages (1 lần trên GitHub)
-
-Repo **Settings → Pages** → Source: **None** để không còn URL `*.github.io/...`.

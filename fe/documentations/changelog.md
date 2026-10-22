@@ -2,6 +2,7 @@
 
 ## 2026-10-23
 
+- **Deploy Pages:** `.github/workflows/deploy-pages.yml` — `build:pages` (`GITHUB_PAGES` + `basePath=/rental`) → artifact `fe/out` → GitHub Pages; URL `https://nchithanh.github.io/rental/`. Thêm `generateStaticParams` (layout) cho route `[id]` + `lib/pages-static-params.ts`.
 - **CI:** GitHub Actions `.github/workflows/build.yml` — `npm ci` + `npm run build` trên `fe/` (push/PR `main` + `workflow_dispatch`); cập nhật `deploy.md`.
 - **Typography = POS:** `PageHeader` (`text-xl/2xl` + mô tả `text-sm`); section `font-bold`; KPI `text-lg/xl`; bỏ eyebrow + `font-display text-3xl` trên app pages.
 - **Sidebar POS-style:** DOLPHIN RENTAL + lĩnh vực; Chi nhánh select (`branchName`/`branches`); badge số đơn mở / trả / kho / thu / nhắc; active thanh trái + `brand-50`; `SEED_VERSION` 11.
