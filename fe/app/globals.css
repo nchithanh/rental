@@ -1,0 +1,205 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f4f6f8;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  /* Brand Dolphin — dùng chung mọi lĩnh vực (#5d5cc4) */
+  --brand-50: #f3f3fb;
+  --brand-100: #e4e4f6;
+  --brand-300: #9b9adc;
+  --brand-400: #7a79d0;
+  --brand-500: #5d5cc4;
+  --brand-600: #4a49a3;
+  --brand-700: #3d3c8a;
+  --brand-950: #1e1e3d;
+  --primary: var(--brand-500);
+  --primary-foreground: #ffffff;
+  --banner: var(--brand-50);
+}
+
+.dark {
+  --background: #020617;
+  --foreground: #f1f5f9;
+  --card: #0f172a;
+  --muted: #cbd5e1;
+  --border: #334155;
+  --brand-50: color-mix(in srgb, var(--brand-500) 18%, #020617);
+  --brand-100: color-mix(in srgb, var(--brand-500) 28%, #020617);
+  --brand-950: color-mix(in srgb, var(--brand-500) 35%, #000);
+  --primary: var(--brand-400);
+  --primary-foreground: #1e1e3d;
+  --banner: var(--brand-50);
+}
+
+/*
+ * Remap Tailwind emerald-* → brand Dolphin.
+ * data-vertical chỉ còn gắn seed / ngữ cảnh; không đổi màu accent.
+ */
+.bg-emerald-50 {
+  background-color: var(--brand-50) !important;
+}
+.bg-emerald-100 {
+  background-color: var(--brand-100) !important;
+}
+.bg-emerald-300 {
+  background-color: var(--brand-300) !important;
+}
+.bg-emerald-400 {
+  background-color: var(--brand-400) !important;
+}
+.bg-emerald-500 {
+  background-color: var(--brand-500) !important;
+}
+.bg-emerald-600 {
+  background-color: var(--brand-600) !important;
+}
+.bg-emerald-700 {
+  background-color: var(--brand-700) !important;
+}
+.bg-emerald-950 {
+  background-color: var(--brand-950) !important;
+}
+.text-emerald-300 {
+  color: var(--brand-300) !important;
+}
+.text-emerald-400 {
+  color: var(--brand-400) !important;
+}
+.text-emerald-500 {
+  color: var(--brand-500) !important;
+}
+.text-emerald-600 {
+  color: var(--brand-600) !important;
+}
+.text-emerald-700 {
+  color: var(--brand-700) !important;
+}
+.border-emerald-200 {
+  border-color: color-mix(in srgb, var(--brand-500) 28%, transparent) !important;
+}
+.border-emerald-300 {
+  border-color: var(--brand-300) !important;
+}
+.border-emerald-400 {
+  border-color: var(--brand-400) !important;
+}
+.border-emerald-500 {
+  border-color: var(--brand-500) !important;
+}
+.border-emerald-700 {
+  border-color: var(--brand-700) !important;
+}
+.ring-emerald-500 {
+  --tw-ring-color: var(--brand-500) !important;
+}
+.from-emerald-50 {
+  --tw-gradient-from: var(--brand-50) !important;
+}
+.to-emerald-950 {
+  --tw-gradient-to: var(--brand-950) !important;
+}
+.from-emerald-950 {
+  --tw-gradient-from: var(--brand-950) !important;
+}
+
+.dark .text-slate-500 {
+  color: #94a3b8;
+}
+.dark .text-slate-400 {
+  color: #94a3b8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--background);
+  color: var(--foreground);
+  font-family:
+    Geist,
+    Inter,
+    "Be Vietnam Pro",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Ẩn scrollbar — vẫn cuộn được (chuột / trackpad / touch) */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Bottom dock mobile — lõm chữ U giữa ôm nút Bán hàng (banking dock) */
+.pos-mobile-dock-pill--notch {
+  /* Tâm lõm ~trùng tâm FAB (pt-9 + h-14); R 42px >> nút 28px → lõm to, khe trắng rõ */
+  -webkit-mask-image: radial-gradient(
+    circle 42px at 50% -8px,
+    transparent 0,
+    transparent 40px,
+    #000 42px
+  );
+  mask-image: radial-gradient(
+    circle 42px at 50% -8px,
+    transparent 0,
+    transparent 40px,
+    #000 42px
+  );
+}
+
+/* Print: only the receipt body (opened print window or in-page preview). */
+@media print {
+  @page {
+    margin: 4mm;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  [data-receipt-print],
+  [data-receipt-print] * {
+    visibility: visible !important;
+  }
+
+  [data-receipt-print] {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+    color: black !important;
+  }
+}

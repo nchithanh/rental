@@ -1,0 +1,14 @@
+node_modules
+fe/node_modules
+fe/.next
+fe/out
+.DS_Store
+*.log
+.env*.local
+fe/public/sw.js
+fe/public/sw.js.map
+fe/public/workbox-*.js
+fe/public/workbox-*.js.map
+fe/public/swe-worker-*.js
+.tmp
+.turbo
