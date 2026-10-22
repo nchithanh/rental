@@ -156,12 +156,6 @@ export default function HomePage() {
       .map(([id, n]) => ({ name: nameOf(id), count: n }));
   }, [orders, garments]);
 
-  const upcoming =
-    orders
-      ?.filter((o) => o.status === "scheduled" || o.status === "confirmed")
-      .sort((a, b) => a.startDate.localeCompare(b.startDate))
-      .slice(0, 5) ?? [];
-
   const aiHints = useMemo(() => {
     const items: {
       id: string;
@@ -293,47 +287,49 @@ export default function HomePage() {
         </p>
       </div>
 
-      <div className="mb-4 grid grid-cols-2 gap-2 sm:gap-3">
-        {[
-          {
-            href: "/don-thue/moi",
-            label: "Tạo đơn thuê",
-            icon: ClipboardPlus,
-            primary: true,
-          },
-          {
-            href: "/tra-do",
-            label: "Trả đồ",
-            icon: PackageCheck,
-            primary: false,
-          },
-          {
-            href: "/trang-phuc",
-            label: "Thêm / xem đồ",
-            icon: Shirt,
-            primary: false,
-          },
-          {
-            href: "/khach-hang",
-            label: "Khách hàng",
-            icon: UserPlus,
-            primary: false,
-          },
-        ].map((a) => {
-          const Icon = a.icon;
-          return (
-            <Link key={a.href + a.label} href={a.href}>
-              <Button
-                variant={a.primary ? "default" : "outline"}
-                className="h-auto w-full justify-start gap-2 rounded-[10px] px-3 py-3"
-              >
-                <Icon size={18} />
-                <span className="text-sm font-semibold">{a.label}</span>
-              </Button>
-            </Link>
-          );
-        })}
-      </div>
+      <section className="mb-4" aria-label="Thao tác nhanh">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+          {[
+            {
+              href: "/don-thue/moi",
+              label: "Tạo đơn thuê",
+              icon: ClipboardPlus,
+              primary: true,
+            },
+            {
+              href: "/tra-do",
+              label: "Trả đồ",
+              icon: PackageCheck,
+              primary: false,
+            },
+            {
+              href: "/trang-phuc",
+              label: "Thêm / xem đồ",
+              icon: Shirt,
+              primary: false,
+            },
+            {
+              href: "/khach-hang",
+              label: "Khách hàng",
+              icon: UserPlus,
+              primary: false,
+            },
+          ].map((a) => {
+            const Icon = a.icon;
+            return (
+              <Link key={a.href + a.label} href={a.href}>
+                <Button
+                  variant={a.primary ? "default" : "outline"}
+                  className="h-auto w-full justify-start gap-2 rounded-[10px] px-3 py-3"
+                >
+                  <Icon size={18} />
+                  <span className="text-sm font-semibold">{a.label}</span>
+                </Button>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
 
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
         {kpis.map((k) => {
@@ -360,112 +356,6 @@ export default function HomePage() {
           );
         })}
       </div>
-
-      <Card className="mb-4 border-[var(--brand-100)] bg-gradient-to-br from-[var(--brand-50)] to-white p-4">
-        <div className="mb-2 flex items-center gap-2 text-sm font-bold text-[var(--brand-700)]">
-          <Sparkles size={16} />
-          Dolphin AI
-        </div>
-        <p className="text-sm font-semibold text-slate-800">
-          Gợi ý vận hành — quá hạn, khách ngủ đông, đồ đang chăm sóc
-        </p>
-        {aiHints.length === 0 ? (
-          <p className="mt-3 text-xs text-slate-500">
-            Chưa có gợi ý nổi bật lúc này.
-          </p>
-        ) : (
-          <div className="mt-3 space-y-2">
-            <ul className="space-y-2">
-              {aiPreview.map((a) => (
-                <li
-                  key={a.id}
-                  className="rounded-[10px] bg-white/90 p-3 text-sm shadow-sm"
-                >
-                  <p className="font-semibold">{a.title}</p>
-                  <p className="text-xs text-slate-500">{a.detail}</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <Link href={a.href}>
-                      <Button size="sm">Xử lý</Button>
-                    </Link>
-                    {a.phone ? (
-                      <a
-                        href={`https://zalo.me/${a.phone.replace(/\D/g, "")}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <Button size="sm" variant="outline">
-                          Zalo
-                        </Button>
-                      </a>
-                    ) : null}
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            <AnimatePresence initial={false}>
-              {aiExpanded && aiRest.length > 0 ? (
-                <motion.ul
-                  key="ai-rest"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                  className="space-y-2 overflow-hidden"
-                >
-                  {aiRest.map((a, i) => (
-                    <motion.li
-                      key={a.id}
-                      initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.04, duration: 0.2 }}
-                      className="rounded-[10px] bg-white/90 p-3 text-sm shadow-sm"
-                    >
-                      <p className="font-semibold">{a.title}</p>
-                      <p className="text-xs text-slate-500">{a.detail}</p>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        <Link href={a.href}>
-                          <Button size="sm">Xử lý</Button>
-                        </Link>
-                        {a.phone ? (
-                          <a
-                            href={`https://zalo.me/${a.phone.replace(/\D/g, "")}`}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            <Button size="sm" variant="outline">
-                              Zalo
-                            </Button>
-                          </a>
-                        ) : null}
-                      </div>
-                    </motion.li>
-                  ))}
-                </motion.ul>
-              ) : null}
-            </AnimatePresence>
-
-            {aiRest.length > 0 ? (
-              <button
-                type="button"
-                onClick={() => setAiExpanded((v) => !v)}
-                className="flex w-full items-center justify-center gap-1 rounded-[10px] py-2 text-sm font-semibold text-[var(--brand-600)] hover:bg-white/60"
-              >
-                {aiExpanded
-                  ? "Thu gọn"
-                  : `Xem thêm ${aiRest.length} gợi ý`}
-                <ChevronDown
-                  size={16}
-                  className={cn(
-                    "transition-transform duration-200",
-                    aiExpanded && "rotate-180",
-                  )}
-                />
-              </button>
-            ) : null}
-          </div>
-        )}
-      </Card>
 
       <div className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
         <Card className="p-4">
@@ -615,67 +505,140 @@ export default function HomePage() {
         </Card>
       </div>
 
-      <Card className="mb-4 p-4">
-        <h2 className="mb-3 font-bold">Tình trạng kho đồ</h2>
-        <div className="h-40">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={garmentStatusChart}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis
-                dataKey="name"
-                tick={{ fontSize: 10 }}
-                interval={0}
-                angle={-20}
-                textAnchor="end"
-                height={50}
-              />
-              <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={28} />
-              <Tooltip />
-              <Bar
-                dataKey="value"
-                name="Số món"
-                fill="#34d399"
-                radius={[6, 6, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </Card>
+      <div className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
+        <Card className="p-4">
+          <h2 className="mb-3 font-bold">Tình trạng kho đồ</h2>
+          <div className="h-52">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={garmentStatusChart}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 10 }}
+                  interval={0}
+                  angle={-20}
+                  textAnchor="end"
+                  height={50}
+                />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={28} />
+                <Tooltip />
+                <Bar
+                  dataKey="value"
+                  name="Số món"
+                  fill="#34d399"
+                  radius={[6, 6, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
 
-      <section aria-labelledby="upcoming-heading">
-        <div className="mb-2 flex items-center justify-between">
-          <h2 id="upcoming-heading" className="font-bold">
-            Đơn sắp tới
-          </h2>
-          <Link
-            href="/don-thue/moi"
-            className="text-sm font-semibold text-[var(--brand-600)]"
-          >
-            + Tạo đơn
-          </Link>
-        </div>
-        <div className="space-y-2">
-          {upcoming.length === 0 ? (
-            <Card className="p-4 text-sm text-slate-500">Chưa có đơn sắp tới</Card>
+        <Card className="border-[var(--brand-100)] bg-gradient-to-br from-[var(--brand-50)] to-white p-4">
+          <div className="mb-2 flex items-center gap-2 text-sm font-bold text-[var(--brand-700)]">
+            <Sparkles size={16} />
+            Dolphin AI
+          </div>
+          <p className="text-sm font-semibold text-slate-800">
+            Gợi ý vận hành — quá hạn, khách ngủ đông, đồ đang chăm sóc
+          </p>
+          {aiHints.length === 0 ? (
+            <p className="mt-3 text-xs text-slate-500">
+              Chưa có gợi ý nổi bật lúc này.
+            </p>
           ) : (
-            upcoming.map((o) => (
-              <Link key={o.id} href={`/don-thue/${o.id}`}>
-                <Card className="flex items-center justify-between p-3">
-                  <div>
-                    <p className="font-semibold">{o.code}</p>
-                    <p className="text-xs text-slate-500">
-                      {o.startDate} → {o.endDate}
-                    </p>
-                  </div>
-                  <span className="rounded-full bg-[var(--brand-50)] px-2 py-1 text-[10px] font-bold text-[var(--brand-600)]">
-                    {ORDER_STATUS_LABEL[o.status]}
-                  </span>
-                </Card>
-              </Link>
-            ))
+            <div className="mt-3 space-y-2">
+              <ul className="space-y-2">
+                {aiPreview.map((a) => (
+                  <li
+                    key={a.id}
+                    className="rounded-[10px] bg-white/90 p-3 text-sm shadow-sm"
+                  >
+                    <p className="font-semibold">{a.title}</p>
+                    <p className="text-xs text-slate-500">{a.detail}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <Link href={a.href}>
+                        <Button size="sm">Xử lý</Button>
+                      </Link>
+                      {a.phone ? (
+                        <a
+                          href={`https://zalo.me/${a.phone.replace(/\D/g, "")}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <Button size="sm" variant="outline">
+                            Zalo
+                          </Button>
+                        </a>
+                      ) : null}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <AnimatePresence initial={false}>
+                {aiExpanded && aiRest.length > 0 ? (
+                  <motion.ul
+                    key="ai-rest"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                    className="space-y-2 overflow-hidden"
+                  >
+                    {aiRest.map((a, i) => (
+                      <motion.li
+                        key={a.id}
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.04, duration: 0.2 }}
+                        className="rounded-[10px] bg-white/90 p-3 text-sm shadow-sm"
+                      >
+                        <p className="font-semibold">{a.title}</p>
+                        <p className="text-xs text-slate-500">{a.detail}</p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <Link href={a.href}>
+                            <Button size="sm">Xử lý</Button>
+                          </Link>
+                          {a.phone ? (
+                            <a
+                              href={`https://zalo.me/${a.phone.replace(/\D/g, "")}`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <Button size="sm" variant="outline">
+                                Zalo
+                              </Button>
+                            </a>
+                          ) : null}
+                        </div>
+                      </motion.li>
+                    ))}
+                  </motion.ul>
+                ) : null}
+              </AnimatePresence>
+
+              {aiRest.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setAiExpanded((v) => !v)}
+                  className="flex w-full items-center justify-center gap-1 rounded-[10px] py-2 text-sm font-semibold text-[var(--brand-600)] hover:bg-white/60"
+                >
+                  {aiExpanded
+                    ? "Thu gọn"
+                    : `Xem thêm ${aiRest.length} gợi ý`}
+                  <ChevronDown
+                    size={16}
+                    className={cn(
+                      "transition-transform duration-200",
+                      aiExpanded && "rotate-180",
+                    )}
+                  />
+                </button>
+              ) : null}
+            </div>
           )}
-        </div>
-      </section>
+        </Card>
+      </div>
     </AppShell>
   );
 }
