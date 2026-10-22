@@ -6,6 +6,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/ui/page-header";
 import { db, getDbName } from "@/lib/db";
 import { notify } from "@/lib/notify";
 import {
@@ -21,6 +22,14 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
+function resolvePublicUrl(url: string): string {
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${basePath}${url.startsWith("/") ? url : `/${url}`}`;
+}
+
 export default function SettingsPage() {
   const settings = useLiveQuery(() => db.settings.get("store"));
   const vertical = useVertical();
@@ -29,6 +38,10 @@ export default function SettingsPage() {
   const [slogan, setSlogan] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [bannerUrl, setBannerUrl] = useState("");
+  const [headline, setHeadline] = useState("");
+  const [sub, setSub] = useState("");
+  const [badge, setBadge] = useState("");
 
   useEffect(() => {
     if (!settings) return;
@@ -36,6 +49,10 @@ export default function SettingsPage() {
     setSlogan(settings.slogan);
     setPhone(settings.phone);
     setAddress(settings.address);
+    setBannerUrl(settings.showcaseBannerUrl ?? "/showcase-banner.jpg");
+    setHeadline(settings.showcaseHeadline ?? "");
+    setSub(settings.showcaseSub ?? "");
+    setBadge(settings.showcaseBadge ?? "");
   }, [settings]);
 
   const save = async () => {
@@ -47,6 +64,12 @@ export default function SettingsPage() {
       address,
       zaloNotifyEnabled: settings?.zaloNotifyEnabled ?? false,
       websiteShowcaseTodo: true,
+      showcaseBannerUrl: bannerUrl.trim() || "/showcase-banner.jpg",
+      showcaseHeadline: headline.trim(),
+      showcaseSub: sub.trim(),
+      showcaseBadge: badge.trim(),
+      branchName: settings?.branchName,
+      branches: settings?.branches,
     });
     notify.success("Đã lưu cài đặt");
   };
@@ -64,10 +87,14 @@ export default function SettingsPage() {
     setVertical(id);
   };
 
+  const previewSrc = resolvePublicUrl(bannerUrl.trim() || "/showcase-banner.jpg");
+
   return (
     <AppShell>
-      <h1 className="mb-1 text-lg font-bold">Cài đặt</h1>
-      <p className="mb-4 text-sm text-slate-500">Thông tin cửa hàng / studio</p>
+      <PageHeader
+        title="Cài đặt"
+        description="Thông tin cửa hàng / studio"
+      />
 
       <Card className="mb-4 space-y-2 p-4">
         <p className="text-sm font-semibold">Lĩnh vực</p>
@@ -115,6 +142,55 @@ export default function SettingsPage() {
           placeholder="Địa chỉ"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
+        />
+      </Card>
+
+      <Card className="mt-4 space-y-3 p-4">
+        <div>
+          <p className="text-sm font-semibold">Banner trang trưng bày</p>
+          <p className="mt-0.5 text-xs text-slate-500">
+            Ảnh hero + copy trên{" "}
+            <a
+              href={`${basePath}/showcase`}
+              className="font-semibold text-[var(--brand-600)] underline-offset-2 hover:underline"
+            >
+              /showcase
+            </a>
+            . Path public (vd.{" "}
+            <code className="text-[11px]">/showcase-banner.jpg</code>) hoặc URL
+            đầy đủ.
+          </p>
+        </div>
+        {previewSrc ? (
+          <div className="overflow-hidden rounded-[10px] border border-[var(--border)] bg-[var(--brand-50)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={previewSrc}
+              alt="Xem trước banner"
+              className="h-36 w-full object-cover"
+            />
+          </div>
+        ) : null}
+        <Input
+          placeholder="URL ảnh banner"
+          value={bannerUrl}
+          onChange={(e) => setBannerUrl(e.target.value)}
+        />
+        <Input
+          placeholder="Headline hero"
+          value={headline}
+          onChange={(e) => setHeadline(e.target.value)}
+        />
+        <Input
+          placeholder="Dòng phụ (sang trọng · thanh lịch…)"
+          value={sub}
+          onChange={(e) => setSub(e.target.value)}
+        />
+        <textarea
+          className="min-h-20 w-full rounded-[10px] border border-[var(--border)] bg-white px-3 py-2.5 text-sm outline-none focus:border-[var(--brand-500)]"
+          placeholder="Badge ưu tiên / cập nhật mẫu"
+          value={badge}
+          onChange={(e) => setBadge(e.target.value)}
         />
         <Button className="w-full" onClick={() => void save()}>
           Lưu

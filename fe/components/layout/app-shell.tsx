@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ClipboardList, LayoutGrid, LogOut, Share2 } from "lucide-react";
+import { ChevronDown, ClipboardList, LayoutGrid, LogOut, Share2 } from "lucide-react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,9 @@ import { PageTransition } from "@/components/layout/page-transition";
 import { db } from "@/lib/db";
 import { notify } from "@/lib/notify";
 import { getNavGroups, isNavActive } from "@/lib/nav";
+import { useNavBadges } from "@/lib/nav-badges";
 import { cn } from "@/lib/utils";
-import { useVertical } from "@/lib/vertical";
+import { getVerticalCopy, useVertical } from "@/lib/vertical";
 import { useAuthStore } from "@/stores/auth-store";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -25,7 +26,7 @@ function showcaseUrl() {
 
 async function shareShowcase() {
   const url = showcaseUrl();
-  const title = "Website trưng bày — Studio Thuê";
+  const title = "Website trưng bày — Dolphin Studio Váy & Vest";
   const data: ShareData = { title, text: title, url };
 
   if (typeof navigator === "undefined" || typeof navigator.share !== "function") {
@@ -61,9 +62,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const path = normalizePath(pathname);
   const router = useRouter();
   const vertical = useVertical();
+  const verticalCopy = getVerticalCopy(vertical);
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const settings = useLiveQuery(() => db.settings.get("store"));
+  const badges = useNavBadges();
 
   const groups = useMemo(() => {
     return getNavGroups(vertical)
@@ -89,42 +92,88 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [nav]);
   const menuActive = path === "/menu";
   const ordersActive = isNavActive("/don-thue", path);
+  const studioName = settings?.name ?? "Dolphin Studio Váy & Vest";
+  const branchList =
+    settings?.branches?.length
+      ? settings.branches
+      : [settings?.branchName || studioName].filter(Boolean);
+  const branchName = settings?.branchName || branchList[0] || studioName;
+
+  const setBranch = async (name: string) => {
+    if (!settings || name === settings.branchName) return;
+    await db.settings.put({ ...settings, branchName: name });
+  };
 
   return (
     <div className="flex h-dvh overflow-hidden bg-[var(--background)]">
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-[var(--border)] bg-[var(--card)] lg:flex">
-        <div className="flex items-center gap-2 border-b border-[var(--border)] px-4 py-4">
-          <BrandMark className="h-9 w-9" />
+      <aside className="hidden w-[260px] shrink-0 flex-col border-r border-[var(--border)] bg-white lg:flex">
+        <div className="flex items-center gap-3 px-5 pt-5 pb-2">
+          <BrandMark className="h-10 w-10" />
           <div className="min-w-0">
-            <p className="truncate text-sm font-bold">
-              {settings?.name ?? "Studio Thuê"}
+            <p className="truncate text-base font-bold tracking-wide text-[var(--brand-700)] uppercase">
+              Dolphin Rental
             </p>
-            <p className="truncate text-[11px] text-slate-400">Dolphin Rental</p>
+            <p className="truncate text-[11px] text-slate-500">
+              {verticalCopy.label}
+            </p>
           </div>
         </div>
-        <nav className="flex-1 space-y-4 overflow-y-auto p-3">
+
+        <div className="px-4 pb-3">
+          <p className="mb-1.5 px-1 text-[10px] font-semibold tracking-[0.12em] text-slate-500 uppercase">
+            Chi nhánh
+          </p>
+          <div className="relative">
+            <select
+              aria-label="Chọn chi nhánh"
+              className="w-full appearance-none rounded-[10px] border border-[var(--border)] bg-white py-2.5 pr-9 pl-3 text-sm font-medium text-slate-800 outline-none focus:border-[var(--brand-500)]"
+              value={branchName}
+              onChange={(e) => void setBranch(e.target.value)}
+            >
+              {branchList.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              size={16}
+              className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-slate-400"
+            />
+          </div>
+        </div>
+
+        <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
           {groups.map((group) => (
             <div key={group.id}>
-              <p className="mb-1 px-2 text-[10px] font-bold tracking-wide text-slate-400 uppercase">
+              <p className="mb-1.5 px-3 text-[10px] font-semibold tracking-[0.12em] text-slate-500 uppercase">
                 {group.label}
               </p>
               <ul className="space-y-0.5">
                 {group.items.map((item) => {
                   const active = isNavActive(item.href, path);
                   const Icon = item.icon;
+                  const count = badges[item.href] ?? 0;
                   return (
                     <li key={item.href}>
                       <Link
                         href={item.href}
                         className={cn(
-                          "flex items-center gap-2 rounded-[12px] px-3 py-2.5 text-sm font-medium",
+                          "relative flex items-center gap-2.5 rounded-[10px] px-3 py-2.5 text-sm font-medium transition-colors",
                           active
-                            ? "bg-[var(--brand-50)] text-[var(--brand-600)]"
-                            : "text-slate-600 hover:bg-slate-50",
+                            ? "bg-[var(--brand-50)] text-slate-900 before:absolute before:top-1.5 before:bottom-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-[var(--brand-500)]"
+                            : "text-slate-600 hover:bg-[var(--brand-50)]/70",
                         )}
                       >
-                        <Icon size={18} />
-                        {item.label}
+                        <Icon size={18} className="shrink-0 text-slate-700" />
+                        <span className="min-w-0 flex-1 truncate">
+                          {item.label}
+                        </span>
+                        {count > 0 ? (
+                          <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[var(--brand-500)] px-1.5 text-[10px] font-bold text-white tabular-nums">
+                            {count > 99 ? "99+" : count}
+                          </span>
+                        ) : null}
                       </Link>
                     </li>
                   );
@@ -133,14 +182,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           ))}
         </nav>
-        <div className="border-t border-[var(--border)] p-3">
-          <div className="mb-2 flex items-center gap-2 px-1">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--brand-50)] text-sm font-bold text-[var(--brand-600)]">
+        <div className="border-t border-[var(--border)] p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#22c55e] text-base font-bold text-white">
               {(user?.name ?? "N").trim().charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold">{user?.name}</p>
-              <p className="truncate text-xs text-slate-400">{user?.role}</p>
+              <p className="truncate text-xs text-slate-500">
+                {user?.email ??
+                  (user?.role === "owner" ? "Chủ studio" : "Nhân viên")}
+              </p>
             </div>
           </div>
         </div>
@@ -150,31 +202,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <OfflineBanner />
         <header
           data-pos-shell-header
-          className="z-30 flex shrink-0 items-center gap-2 border-b border-[var(--border)] bg-[var(--card)]/95 px-3 py-3 backdrop-blur sm:px-5"
+          className="z-30 flex shrink-0 items-center gap-2 border-b border-[var(--border)] bg-white/90 px-3 py-3.5 backdrop-blur-md sm:px-6"
         >
           <div className="flex min-w-0 flex-1 items-center gap-2.5">
             <BrandMark className="h-8 w-8 shrink-0 lg:hidden" />
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold">
-                {settings?.name ?? "Studio Thuê"}
+              <p className="truncate text-base font-bold text-slate-900 lg:text-lg">
+                {studioName}
               </p>
               <p className="truncate text-[11px] text-slate-500">
-                {user?.name ?? "—"}
+                Xin chào, {user?.name ?? "—"}
                 {user?.role === "owner"
                   ? " · Chủ studio"
                   : user
                     ? " · Nhân viên"
                     : ""}
-                <span className="hidden sm:inline">
-                  {" · "}
-                  {settings?.slogan ?? "Cho thuê trang phục"}
-                </span>
               </p>
             </div>
           </div>
           <Button
             size="sm"
-            className="shrink-0 gap-1 rounded-full px-3"
+            variant="default"
+            className="shrink-0 gap-1"
             onClick={() => void shareShowcase()}
           >
             <Share2 size={16} />
@@ -194,7 +243,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Button>
         </header>
 
-        <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 py-4 pb-36 sm:px-5 lg:pb-6">
+        <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 py-5 pb-36 sm:px-6 lg:pb-8">
           <PageTransition>{children}</PageTransition>
         </main>
       </div>
@@ -218,10 +267,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </Link>
           ) : null}
 
-          <div className="relative drop-shadow-[0_8px_20px_rgba(15,23,42,0.12)]">
+          <div className="relative drop-shadow-[0_8px_24px_rgba(26,35,50,0.1)]">
             <div
               className={cn(
-                "pos-mobile-dock-pill relative flex h-[3.85rem] items-end rounded-full border border-[var(--border)] bg-[var(--card)] px-1.5 pb-1 backdrop-blur-md",
+                "pos-mobile-dock-pill relative flex h-[3.85rem] items-end rounded-full border border-[var(--border)] bg-white/95 px-1.5 pb-1 backdrop-blur-md",
                 mobileDock.orders && "pos-mobile-dock-pill--notch",
               )}
             >
@@ -230,37 +279,52 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   const item = mobileDock[slot];
                   if (!item) return <div key={slot} />;
                   const active = isNavActive(item.href, path);
-                  const Icon = item.icon;
                   const isHome = item.href === "/";
+                  const Icon = item.icon;
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "flex h-full flex-col items-center justify-end gap-0.5 px-0.5 pb-1",
-                        active ? "text-emerald-600" : "text-slate-400",
+                        "mx-0.5 flex h-full flex-col items-center justify-end gap-0.5 px-0.5 pb-1",
+                        active
+                          ? "text-[var(--brand-600)]"
+                          : "text-slate-500",
                       )}
                     >
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center">
                         {isHome ? (
                           <BrandMark className="h-5 w-5" />
                         ) : (
-                          <Icon size={20} strokeWidth={2} />
+                          <Icon
+                            size={20}
+                            strokeWidth={active ? 2.25 : 2}
+                            className={
+                              active ? "text-[var(--brand-600)]" : undefined
+                            }
+                          />
                         )}
                       </span>
-                      <span className="h-3.5 w-full truncate text-center text-[10px] leading-none font-medium">
+                      <span
+                        className={cn(
+                          "h-3.5 w-full truncate text-center text-[10px] leading-none font-medium",
+                          active && "text-[var(--brand-600)]",
+                        )}
+                      >
                         {item.mobileLabel ?? item.label}
                       </span>
                     </Link>
                   );
                 })}
 
-                <div className="flex h-full flex-col items-center justify-end gap-0.5 px-0.5 pb-1">
+                <div className="mx-0.5 flex h-full flex-col items-center justify-end gap-0.5 px-0.5 pb-1">
                   <span className="h-5 w-5 shrink-0" aria-hidden />
                   <span
                     className={cn(
                       "h-3.5 w-full truncate text-center text-[10px] leading-none font-medium",
-                      ordersActive ? "text-emerald-600" : "text-slate-400",
+                      ordersActive
+                        ? "text-[var(--brand-600)]"
+                        : "text-slate-500",
                     )}
                   >
                     {mobileDock.orders?.mobileLabel ??
@@ -278,14 +342,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <Link
                       href={item.href}
                       className={cn(
-                        "flex h-full flex-col items-center justify-end gap-0.5 px-0.5 pb-1",
-                        active ? "text-emerald-600" : "text-slate-400",
+                        "mx-0.5 flex h-full flex-col items-center justify-end gap-0.5 px-0.5 pb-1",
+                        active
+                          ? "text-[var(--brand-600)]"
+                          : "text-slate-500",
                       )}
                     >
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center">
-                        <Icon size={20} strokeWidth={2} />
+                        <Icon
+                          size={20}
+                          strokeWidth={active ? 2.25 : 2}
+                          className={
+                            active ? "text-[var(--brand-600)]" : undefined
+                          }
+                        />
                       </span>
-                      <span className="h-3.5 w-full truncate text-center text-[10px] leading-none font-medium">
+                      <span
+                        className={cn(
+                          "h-3.5 w-full truncate text-center text-[10px] leading-none font-medium",
+                          active && "text-[var(--brand-600)]",
+                        )}
+                      >
                         {item.mobileLabel ?? item.label}
                       </span>
                     </Link>
@@ -295,14 +372,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   href="/menu"
                   className={cn(
-                    "flex h-full flex-col items-center justify-end gap-0.5 px-0.5 pb-1",
-                    menuActive ? "text-emerald-600" : "text-slate-400",
+                    "mx-0.5 flex h-full flex-col items-center justify-end gap-0.5 px-0.5 pb-1",
+                    menuActive
+                      ? "text-[var(--brand-600)]"
+                      : "text-slate-500",
                   )}
                 >
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center">
-                    <LayoutGrid size={20} strokeWidth={2} />
+                    <LayoutGrid
+                      size={20}
+                      strokeWidth={menuActive ? 2.25 : 2}
+                      className={
+                        menuActive ? "text-[var(--brand-600)]" : undefined
+                      }
+                    />
                   </span>
-                  <span className="h-3.5 w-full truncate text-center text-[10px] leading-none font-medium">
+                  <span
+                    className={cn(
+                      "h-3.5 w-full truncate text-center text-[10px] leading-none font-medium",
+                      menuActive && "text-[var(--brand-600)]",
+                    )}
+                  >
                     Menu
                   </span>
                 </Link>

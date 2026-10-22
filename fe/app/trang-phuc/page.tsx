@@ -7,6 +7,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   attrsFromForm,
   getAttributeDefs,
@@ -157,17 +158,15 @@ export default function GarmentsPage() {
 
   return (
     <AppShell>
-      <div className="mb-4 flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-bold">{copy.catalog}</h1>
-          <p className="text-sm text-slate-500">
-            Hình · mã · thuộc tính · giá thuê · tình trạng
-          </p>
-        </div>
-        <Button size="sm" onClick={() => setAdding((v) => !v)}>
-          {adding ? "Đóng" : "+ Thêm"}
-        </Button>
-      </div>
+      <PageHeader
+        title={copy.catalog}
+        description="Ảnh · thuộc tính · giá · tình trạng"
+        actions={
+          <Button size="sm" variant="default" onClick={() => setAdding((v) => !v)}>
+            {adding ? "Đóng" : "+ Thêm"}
+          </Button>
+        }
+      />
 
       {adding ? (
         <Card className="mb-4 space-y-2 p-4">
@@ -265,8 +264,8 @@ export default function GarmentsPage() {
             className={cn(
               "shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold",
               status === s
-                ? "bg-emerald-500 text-white"
-                : "border bg-white text-slate-600",
+                ? "bg-[var(--brand-500)] text-white"
+                : "border border-[var(--border)] bg-white text-slate-900",
             )}
           >
             {s === "all" ? "Tất cả" : GARMENT_STATUS_LABEL[s]}{" "}
@@ -275,43 +274,47 @@ export default function GarmentsPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5 lg:grid-cols-6 lg:gap-3">
         {filtered.map((g) => (
-          <Link key={g.id} href={`/trang-phuc/${g.id}`}>
-            <Card className="h-full overflow-hidden transition hover:ring-1 hover:ring-[var(--brand-300)]">
-              <div className="relative flex h-28 items-center justify-center bg-[var(--brand-50)] sm:h-36">
+          <Link key={g.id} href={`/trang-phuc/${g.id}`} className="min-w-0">
+            <article className="group h-full">
+              <div className="relative aspect-square overflow-hidden rounded-[10px] bg-[var(--brand-50)] sm:aspect-[5/6]">
                 {g.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={g.imageUrl}
                     alt={g.name}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
                   />
                 ) : (
-                  <span className="text-4xl sm:text-5xl">{g.emoji ?? "👗"}</span>
+                  <span className="flex h-full items-center justify-center text-4xl">
+                    {g.emoji ?? "👗"}
+                  </span>
                 )}
                 <span
                   className={cn(
-                    "absolute top-1.5 right-1.5 max-w-[70%] truncate rounded-full px-1.5 py-0.5 text-[9px] font-bold sm:top-2 sm:right-2 sm:text-[10px]",
+                    "absolute top-2 right-2 max-w-[70%] truncate rounded-full px-2 py-0.5 text-[10px] font-bold shadow-sm",
                     garmentStatusTone(g.status),
                   )}
                 >
                   {GARMENT_STATUS_LABEL[g.status]}
                 </span>
               </div>
-              <div className="p-2.5 sm:p-4">
-                <p className="text-[10px] text-slate-400 sm:text-xs">{g.code}</p>
-                <h2 className="line-clamp-2 text-sm font-bold sm:text-base">
+              <div className="mt-2 space-y-0.5 px-0.5">
+                <h2 className="line-clamp-2 min-h-10 text-sm font-bold text-slate-900">
                   {g.name}
+                  {g.size ? ` · ${g.size}` : ""}
                 </h2>
-                <p className="truncate text-[11px] text-slate-500 sm:text-sm">
-                  {g.size} · {g.color}
-                </p>
-                <p className="mt-1.5 text-sm font-bold text-emerald-700 sm:mt-2 sm:text-base">
-                  {formatVnd(g.rentPrice)}
-                </p>
+                <div className="flex items-baseline justify-between gap-2">
+                  <p className="text-base font-bold tabular-nums text-[var(--brand-600)]">
+                    {formatVnd(g.rentPrice)}
+                  </p>
+                  <p className="truncate text-[11px] text-slate-400">
+                    {g.code}
+                  </p>
+                </div>
               </div>
-            </Card>
+            </article>
           </Link>
         ))}
       </div>

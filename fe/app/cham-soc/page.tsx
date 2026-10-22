@@ -6,6 +6,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { db } from "@/lib/db";
 import { notify } from "@/lib/notify";
 import { todayKey } from "@/lib/utils";
@@ -61,10 +62,10 @@ export default function CarePage() {
 
   return (
     <AppShell>
-      <h1 className="mb-1 text-lg font-bold">Chăm sóc khách</h1>
-      <p className="mb-4 text-sm text-slate-500">
-        Nhắc nhận/trả · Zalo deep-link · website trưng bày
-      </p>
+      <PageHeader
+        title="Chăm sóc khách"
+        description="Nhắc nhận/trả · Zalo deep-link · website trưng bày"
+      />
 
       <Card className="mb-4 space-y-2 p-4">
         <p className="font-bold">Nhắc lịch hôm nay</p>

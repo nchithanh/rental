@@ -6,6 +6,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { AppShell } from "@/components/layout/app-shell";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/ui/page-header";
 import { db, ORDER_STATUS_LABEL } from "@/lib/db";
 import { orderStatusTone } from "@/lib/labels";
 import { orderBalance } from "@/lib/rental";
@@ -76,10 +77,10 @@ export default function ReportsPage() {
 
   return (
     <AppShell>
-      <h1 className="mb-1 text-lg font-bold">Báo cáo</h1>
-      <p className="mb-4 text-sm text-slate-500">
-        Doanh thu ngày/tháng · đơn chưa trả · quá hạn · top đồ · công nợ/cọc
-      </p>
+      <PageHeader
+        title="Báo cáo"
+        description="Doanh thu ngày/tháng · đơn chưa trả · quá hạn · top đồ · công nợ/cọc"
+      />
 
       <Card className="mb-4 grid grid-cols-2 gap-2 p-4">
         <label className="text-sm">
@@ -102,30 +103,40 @@ export default function ReportsPage() {
 
       <div className="mb-4 grid grid-cols-2 gap-3">
         <Card className="p-4">
-          <p className="text-xs text-slate-500">DT ngày chọn</p>
-          <p className="text-lg font-bold">{formatVnd(stats.dayRev)}</p>
+          <p className="text-sm text-slate-500">DT ngày chọn</p>
+          <p className="mt-1 text-lg font-bold tabular-nums sm:text-xl">
+            {formatVnd(stats.dayRev)}
+          </p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs text-slate-500">DT tháng chọn</p>
-          <p className="text-lg font-bold">{formatVnd(stats.monthRev)}</p>
+          <p className="text-sm text-slate-500">DT tháng chọn</p>
+          <p className="mt-1 text-lg font-bold tabular-nums sm:text-xl">
+            {formatVnd(stats.monthRev)}
+          </p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs text-slate-500">Đơn chưa trả</p>
-          <p className="text-lg font-bold">{stats.open.length}</p>
+          <p className="text-sm text-slate-500">Đơn chưa trả</p>
+          <p className="mt-1 text-lg font-bold tabular-nums sm:text-xl">
+            {stats.open.length}
+          </p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs text-slate-500">Đơn quá hạn</p>
-          <p className="text-lg font-bold text-rose-600">
+          <p className="text-sm text-slate-500">Đơn quá hạn</p>
+          <p className="mt-1 text-lg font-bold tabular-nums text-rose-600 sm:text-xl">
             {stats.overdue.length}
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs text-slate-500">Công nợ còn thu</p>
-          <p className="text-lg font-bold">{formatVnd(stats.due)}</p>
+          <p className="text-sm text-slate-500">Công nợ còn thu</p>
+          <p className="mt-1 text-lg font-bold tabular-nums sm:text-xl">
+            {formatVnd(stats.due)}
+          </p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs text-slate-500">Cọc chưa hoàn</p>
-          <p className="text-lg font-bold">{formatVnd(stats.depositHeld)}</p>
+          <p className="text-sm text-slate-500">Cọc chưa hoàn</p>
+          <p className="mt-1 text-lg font-bold tabular-nums sm:text-xl">
+            {formatVnd(stats.depositHeld)}
+          </p>
         </Card>
       </div>
 

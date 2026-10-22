@@ -8,6 +8,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/ui/page-header";
 import { db, GARMENT_STATUS_LABEL } from "@/lib/db";
 import { garmentStatusTone } from "@/lib/labels";
 import { createRentalOrder, isGarmentAvailable } from "@/lib/rental";
@@ -257,12 +258,10 @@ export default function NewOrderPage() {
     <AppShell>
       <div className="flex flex-col gap-3 lg:h-[calc(100dvh-7.5rem)] lg:flex-row">
         <section className="min-w-0 flex-1">
-          <div className="mb-3 rounded-[12px] bg-[var(--banner)] px-4 py-3">
-            <h1 className="text-lg font-bold">Tạo đơn thuê</h1>
-            <p className="text-sm text-slate-600">
-              Thêm đồ vào giỏ · kiểm tra lịch trống · tạo đơn
-            </p>
-          </div>
+          <PageHeader
+            title="Tạo đơn thuê"
+            description="Thêm đồ vào giỏ · kiểm tra lịch trống · tạo đơn"
+          />
 
           {lines.length > 0 ? (
             <button
@@ -317,7 +316,7 @@ export default function NewOrderPage() {
             onChange={(e) => setQuery(e.target.value)}
           />
 
-          <div className="grid grid-cols-2 gap-2.5 pb-28 sm:gap-3 md:grid-cols-3 lg:pb-0 xl:grid-cols-3">
+          <div className="grid grid-cols-2 gap-2.5 pb-28 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 lg:pb-0">
             {filtered.map((g) => {
               const inCart = has(g.id);
               return (

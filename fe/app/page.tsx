@@ -34,12 +34,16 @@ import { vi } from "date-fns/locale";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { db, GARMENT_STATUS_LABEL, ORDER_STATUS_LABEL } from "@/lib/db";
+import { orderStatusTone } from "@/lib/labels";
 import { orderBalance } from "@/lib/rental";
 import { cn, formatVnd, todayKey } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth-store";
 import type { GarmentStatus, OrderStatus } from "@/types";
 
 const BRAND = "#5d5cc4";
+const GOLD = "#7a79d0";
 const PIE_COLORS = ["#5d5cc4", "#7a79d0", "#9b9adc", "#34d399", "#fbbf24", "#f87171"];
 
 function isRevenueKind(kind: string) {
@@ -55,6 +59,7 @@ function isRevenueKind(kind: string) {
 type RangeDays = 7 | 30;
 
 export default function HomePage() {
+  const user = useAuthStore((s) => s.user);
   const garments = useLiveQuery(() => db.garments.toArray());
   const orders = useLiveQuery(() => db.orders.toArray());
   const payments = useLiveQuery(() => db.payments.toArray());
@@ -63,6 +68,15 @@ export default function HomePage() {
   const [range, setRange] = useState<RangeDays>(7);
   const [aiExpanded, setAiExpanded] = useState(false);
   const AI_PREVIEW = 3;
+
+  const recentOrders = useMemo(() => {
+    return [...(orders ?? [])]
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, 6);
+  }, [orders]);
+
+  const cusName = (id: string) =>
+    customers?.find((c) => c.id === id)?.name ?? "Khách";
 
   const renting = orders?.filter((o) => o.status === "renting").length ?? 0;
   const overdue = orders?.filter((o) => orderBalance(o).overdue).length ?? 0;
@@ -220,14 +234,16 @@ export default function HomePage() {
       value: String(renting),
       href: "/don-thue",
       icon: Shirt,
-      tone: "bg-sky-50 text-sky-700",
+      tone: "bg-[var(--brand-50)] text-slate-900",
+      trend: "+2 tuần này",
     },
     {
-      label: "Quá hạn trả",
+      label: "Quá hạn",
       value: String(overdue),
       href: "/tra-do",
       icon: AlertTriangle,
-      tone: "bg-rose-50 text-rose-700",
+      tone: "bg-rose-50 text-rose-600",
+      trend: overdue ? "Cần xử lý" : "Ổn định",
     },
     {
       label: "Đồ sẵn sàng",
@@ -235,13 +251,15 @@ export default function HomePage() {
       href: "/trang-phuc",
       icon: PackageCheck,
       tone: "bg-emerald-50 text-emerald-700",
+      trend: "Kho sẵn",
     },
     {
-      label: "DT tháng này",
+      label: "Doanh thu tháng",
       value: formatVnd(revenueMonth),
       href: "/bao-cao",
       icon: CircleDollarSign,
-      tone: "bg-[var(--brand-50)] text-[var(--brand-700)]",
+      tone: "bg-[var(--brand-50)] text-slate-900",
+      trend: "Tháng này",
     },
     {
       label: "Cọc đang giữ",
@@ -249,13 +267,14 @@ export default function HomePage() {
       href: "/thanh-toan",
       icon: Wallet,
       tone: "bg-amber-50 text-amber-800",
+      trend: "Đang giữ",
     },
   ];
 
   function RangeToggle() {
     return (
       <div
-        className="inline-flex rounded-full border border-slate-200 p-0.5 text-xs font-bold"
+        className="inline-flex rounded-full border border-[var(--border)] bg-white p-0.5 text-xs font-semibold"
         role="group"
         aria-label="Khoảng thời gian biểu đồ"
       >
@@ -268,7 +287,7 @@ export default function HomePage() {
               "rounded-full px-2.5 py-1",
               range === d
                 ? "bg-[var(--brand-500)] text-white"
-                : "text-slate-500 hover:bg-slate-50",
+                : "text-slate-500 hover:bg-[var(--brand-50)]",
             )}
           >
             {d} ngày
@@ -280,85 +299,96 @@ export default function HomePage() {
 
   return (
     <AppShell>
-      <div className="mb-4 rounded-[12px] bg-[var(--banner)] px-4 py-3">
-        <h1 className="text-lg font-bold">Tổng quan studio</h1>
-        <p className="text-sm text-slate-600">
-          Đơn thuê · trang phục · cọc · doanh thu
-        </p>
-      </div>
+      <PageHeader
+        title={`Xin chào, ${user?.name?.split(" ").slice(-1)[0] ?? "bạn"}`}
+        description="Đơn thuê · trang phục · cọc · vận hành trong ngày"
+        actions={
+          <section
+            className="grid w-full grid-cols-2 gap-2 sm:grid-cols-4"
+            aria-label="Thao tác nhanh"
+          >
+            {[
+              {
+                href: "/don-thue/moi",
+                label: "Tạo đơn",
+                icon: ClipboardPlus,
+                primary: true as const,
+              },
+              {
+                href: "/tra-do",
+                label: "Trả đồ",
+                icon: PackageCheck,
+                primary: false as const,
+              },
+              {
+                href: "/trang-phuc",
+                label: "Kho đồ",
+                icon: Shirt,
+                primary: false as const,
+              },
+              {
+                href: "/khach-hang",
+                label: "Khách",
+                icon: UserPlus,
+                primary: false as const,
+              },
+            ].map((a) => {
+              const Icon = a.icon;
+              return (
+                <Link key={a.href + a.label} href={a.href}>
+                  <Button
+                    variant={a.primary ? "default" : "outline"}
+                    size="sm"
+                    className="h-auto w-full justify-center gap-1.5 px-3 py-2.5 lg:min-w-[7.5rem]"
+                  >
+                    <Icon
+                      size={16}
+                      className={a.primary ? "text-white/90" : undefined}
+                    />
+                    <span className="text-xs font-semibold sm:text-sm">
+                      {a.label}
+                    </span>
+                  </Button>
+                </Link>
+              );
+            })}
+          </section>
+        }
+      />
 
-      <section className="mb-4" aria-label="Thao tác nhanh">
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
-          {[
-            {
-              href: "/don-thue/moi",
-              label: "Tạo đơn thuê",
-              icon: ClipboardPlus,
-              primary: true,
-            },
-            {
-              href: "/tra-do",
-              label: "Trả đồ",
-              icon: PackageCheck,
-              primary: false,
-            },
-            {
-              href: "/trang-phuc",
-              label: "Thêm / xem đồ",
-              icon: Shirt,
-              primary: false,
-            },
-            {
-              href: "/khach-hang",
-              label: "Khách hàng",
-              icon: UserPlus,
-              primary: false,
-            },
-          ].map((a) => {
-            const Icon = a.icon;
-            return (
-              <Link key={a.href + a.label} href={a.href}>
-                <Button
-                  variant={a.primary ? "default" : "outline"}
-                  className="h-auto w-full justify-start gap-2 rounded-[10px] px-3 py-3"
-                >
-                  <Icon size={18} />
-                  <span className="text-sm font-semibold">{a.label}</span>
-                </Button>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-5">
         {kpis.map((k) => {
           const Icon = k.icon;
           return (
             <Link key={k.label} href={k.href}>
-              <Card className="h-full p-4 transition hover:ring-1 hover:ring-[var(--brand-300)]">
-                <div className="mb-2 flex items-center justify-between gap-2">
-                  <p className="text-xs text-slate-500">{k.label}</p>
+              <div className="studio-kpi h-full p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-slate-500">{k.label}</p>
+                    <p className="mt-1 break-words text-lg font-bold leading-snug tabular-nums sm:text-xl">
+                      {k.value}
+                    </p>
+                    <p className="mt-1 text-xs text-[var(--brand-600)]">
+                      {k.trend}
+                    </p>
+                  </div>
                   <span
                     className={cn(
-                      "inline-flex h-8 w-8 items-center justify-center rounded-[10px]",
+                      "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]",
                       k.tone,
                     )}
                   >
-                    <Icon size={16} />
+                    <Icon size={18} />
                   </span>
                 </div>
-                <p className="text-lg font-bold tabular-nums sm:text-xl">
-                  {k.value}
-                </p>
-              </Card>
+              </div>
             </Link>
           );
         })}
       </div>
 
-      <div className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <Card className="p-4">
+      <div className="mb-5 grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <Card className="p-5">
           <div className="mb-1 flex items-start justify-between gap-2">
             <div>
               <h2 className="font-bold">Doanh thu</h2>
@@ -373,11 +403,11 @@ export default function HomePage() {
               <AreaChart data={series}>
                 <defs>
                   <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={BRAND} stopOpacity={0.35} />
-                    <stop offset="100%" stopColor={BRAND} stopOpacity={0.02} />
+                    <stop offset="0%" stopColor={GOLD} stopOpacity={0.45} />
+                    <stop offset="100%" stopColor={GOLD} stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e8e4de" />
                 <XAxis
                   dataKey="label"
                   tick={{ fontSize: 10 }}
@@ -407,7 +437,7 @@ export default function HomePage() {
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-5">
           <div className="mb-1 flex items-start justify-between gap-2">
             <div>
               <h2 className="font-bold">Số đơn tạo</h2>
@@ -418,7 +448,7 @@ export default function HomePage() {
           <div className="mt-3 h-52">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={series}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e8e4de" />
                 <XAxis
                   dataKey="label"
                   tick={{ fontSize: 10 }}
@@ -437,8 +467,10 @@ export default function HomePage() {
           </div>
         </Card>
 
-        <Card className="p-4">
-          <h2 className="mb-1 font-bold">Đơn theo trạng thái</h2>
+        <Card className="p-5">
+          <h2 className="mb-1 font-bold">
+            Đơn theo trạng thái
+          </h2>
           <p className="mb-3 text-xs text-slate-500">Toàn bộ đơn trong hệ thống</p>
           <div className="flex h-52 items-center gap-2">
             <div className="h-full min-w-0 flex-1">
@@ -478,13 +510,15 @@ export default function HomePage() {
           </div>
         </Card>
 
-        <Card className="p-4">
-          <h2 className="mb-1 font-bold">Top trang phục thuê</h2>
+        <Card className="p-5">
+          <h2 className="mb-1 font-bold">
+            Top trang phục thuê
+          </h2>
           <p className="mb-3 text-xs text-slate-500">Số lần xuất hiện trên đơn</p>
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={topGarments} layout="vertical" margin={{ left: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e8e4de" />
                 <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
                 <YAxis
                   type="category"
@@ -496,7 +530,7 @@ export default function HomePage() {
                 <Bar
                   dataKey="count"
                   name="Lần"
-                  fill="#7a79d0"
+                  fill={GOLD}
                   radius={[0, 6, 6, 0]}
                 />
               </BarChart>
@@ -505,13 +539,15 @@ export default function HomePage() {
         </Card>
       </div>
 
-      <div className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
-        <Card className="p-4">
-          <h2 className="mb-3 font-bold">Tình trạng kho đồ</h2>
+      <div className="mb-5 grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
+        <Card className="p-5">
+          <h2 className="mb-3 font-bold">
+            Tình trạng kho đồ
+          </h2>
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={garmentStatusChart}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e8e4de" />
                 <XAxis
                   dataKey="name"
                   tick={{ fontSize: 10 }}
@@ -533,12 +569,12 @@ export default function HomePage() {
           </div>
         </Card>
 
-        <Card className="border-[var(--brand-100)] bg-gradient-to-br from-[var(--brand-50)] to-white p-4">
-          <div className="mb-2 flex items-center gap-2 text-sm font-bold text-[var(--brand-700)]">
-            <Sparkles size={16} />
+        <Card className="border-[var(--brand-100)] bg-gradient-to-br from-[var(--brand-50)] to-white p-5">
+          <div className="mb-2 flex items-center gap-2 text-sm font-bold text-slate-900">
+            <Sparkles size={16} className="text-[var(--brand-600)]" />
             Dolphin AI
           </div>
-          <p className="text-sm font-semibold text-slate-800">
+          <p className="text-sm font-semibold text-slate-900">
             Gợi ý vận hành — quá hạn, khách ngủ đông, đồ đang chăm sóc
           </p>
           {aiHints.length === 0 ? (
@@ -551,9 +587,9 @@ export default function HomePage() {
                 {aiPreview.map((a) => (
                   <li
                     key={a.id}
-                    className="rounded-[10px] bg-white/90 p-3 text-sm shadow-sm"
+                    className="rounded-[10px] border border-[var(--border)] bg-white/95 p-3 text-sm shadow-sm"
                   >
-                    <p className="font-semibold">{a.title}</p>
+                    <p className="font-semibold text-slate-900">{a.title}</p>
                     <p className="text-xs text-slate-500">{a.detail}</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       <Link href={a.href}>
@@ -621,7 +657,7 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setAiExpanded((v) => !v)}
-                  className="flex w-full items-center justify-center gap-1 rounded-[10px] py-2 text-sm font-semibold text-[var(--brand-600)] hover:bg-white/60"
+                  className="flex w-full items-center justify-center gap-1 rounded-[10px] py-2 text-sm font-semibold text-slate-900 hover:bg-white/70"
                 >
                   {aiExpanded
                     ? "Thu gọn"
@@ -639,6 +675,77 @@ export default function HomePage() {
           )}
         </Card>
       </div>
+
+      <section aria-labelledby="recent-orders-h" className="mb-2">
+        <div className="mb-3 flex items-end justify-between gap-2">
+          <div>
+            <h2
+              id="recent-orders-h"
+              className="font-bold"
+            >
+              Đơn gần đây
+            </h2>
+            <p className="text-xs text-slate-500">
+              Trạng thái · khách · khoảng ngày
+            </p>
+          </div>
+          <Link
+            href="/don-thue"
+            className="text-xs font-semibold text-[var(--brand-600)] underline-offset-4 hover:underline"
+          >
+            Xem tất cả
+          </Link>
+        </div>
+        <Card className="overflow-hidden">
+          <div className="hidden grid-cols-[1.1fr_1fr_1fr_auto_auto] gap-3 border-b border-[var(--border)] bg-[var(--banner)]/60 px-4 py-2.5 text-[11px] font-semibold tracking-wide text-slate-500 uppercase sm:grid">
+            <span>Mã đơn</span>
+            <span>Khách</span>
+            <span>Ngày thuê</span>
+            <span>Tổng</span>
+            <span>Trạng thái</span>
+          </div>
+          {recentOrders.length === 0 ? (
+            <p className="p-4 text-sm text-slate-500">Chưa có đơn.</p>
+          ) : (
+            <ul className="divide-y divide-[var(--border)]">
+              {recentOrders.map((o) => {
+                const bal = orderBalance(o);
+                return (
+                  <li key={o.id}>
+                    <Link
+                      href={`/don-thue/${o.id}`}
+                      className="grid gap-1 px-4 py-3 transition hover:bg-[var(--brand-50)]/50 sm:grid-cols-[1.1fr_1fr_1fr_auto_auto] sm:items-center sm:gap-3"
+                    >
+                      <span className="font-semibold text-slate-900">
+                        {o.code}
+                      </span>
+                      <span className="text-sm text-slate-600">
+                        {cusName(o.customerId)}
+                      </span>
+                      <span className="text-xs text-slate-500 sm:text-sm">
+                        {o.startDate} → {o.endDate}
+                      </span>
+                      <span className="text-sm font-semibold tabular-nums">
+                        {formatVnd(o.rentTotal)}
+                      </span>
+                      <span
+                        className={cn(
+                          "w-fit rounded-full px-2.5 py-1 text-[10px] font-bold",
+                          bal.overdue
+                            ? "bg-rose-50 text-rose-600"
+                            : orderStatusTone(o.status),
+                        )}
+                      >
+                        {bal.overdue ? "Quá hạn" : ORDER_STATUS_LABEL[o.status]}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </Card>
+      </section>
     </AppShell>
   );
 }

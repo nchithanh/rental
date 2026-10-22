@@ -22,7 +22,8 @@
 | `/thanh-toan` | Thanh toán & cọc |
 | `/bao-cao` | Báo cáo |
 | `/cham-soc` | Nhắc lịch / Zalo deep-link |
-| `/showcase` | Public trưng bày (no auth) |
+| `/showcase` | Public trưng bày (no auth); banner váy `/showcase-banner.jpg` · xe `/showcase-banner-xe.jpg` (StoreSettings) |
+| `/cai-dat` | Studio + chỉnh banner trưng bày |
 | `/cai-dat` | Cài đặt |
 | `/login`, `/menu` | Auth · menu mobile |
 

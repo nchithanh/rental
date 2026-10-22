@@ -8,6 +8,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/ui/page-header";
 import { db, ORDER_STATUS_LABEL } from "@/lib/db";
 import { completeReturn, orderBalance } from "@/lib/rental";
 import { formatVnd } from "@/lib/utils";
@@ -94,10 +95,10 @@ function ReturnInner() {
 
   return (
     <>
-      <h1 className="mb-1 text-lg font-bold">Trả đồ</h1>
-      <p className="mb-4 text-sm text-slate-500">
-        Kiểm tra tình trạng · ghi chú · phí · cập nhật sẵn sàng / giặt / sửa
-      </p>
+      <PageHeader
+        title="Trả đồ"
+        description="Kiểm tra tình trạng · ghi chú · phí · cập nhật sẵn sàng / giặt / sửa"
+      />
 
       {openOrders.length === 0 ? (
         <Card className="p-4 text-sm text-slate-500">

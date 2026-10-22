@@ -1,7 +1,24 @@
 # Changelog — Dolphin Studio Thuê FE
 
+## 2026-10-23
+
+- **Typography = POS:** `PageHeader` (`text-xl/2xl` + mô tả `text-sm`); section `font-bold`; KPI `text-lg/xl`; bỏ eyebrow + `font-display text-3xl` trên app pages.
+- **Sidebar POS-style:** DOLPHIN RENTAL + lĩnh vực; Chi nhánh select (`branchName`/`branches`); badge số đơn mở / trả / kho / thu / nhắc; active thanh trái + `brand-50`; `SEED_VERSION` 11.
+- **Trang phục:** ảnh item thấp hơn (`aspect-square` / `5:6`).
+- **List bảng:** đơn thuê / khách hàng — cột đều (`grid-cols-N`), canh trái.
+- **Dock:** Tổng quan = logo Dolphin; active `!text-white` (+ invert logo); `/menu` tile tương tự.
+- **Banner xe:** force `/showcase-banner-xe.jpg` khi vertical `thue-xe` (kể cả settings URL váy cũ); `SEED_VERSION` 10.
+- **Trang phục grid:** card marketplace — ảnh 3:4 bo 10px, metadata gọn, desktop 4 cột.
+- **Overview CTA:** 4 nút thao tác nhanh nằm bên phải section chào (desktop).
+- **Đơn thuê:** KPI overview + list dạng bảng (desktop cột như POS); khách hàng list tương tự.
+- **Showcase:** bỏ link Nhân viên; banner riêng thuê xe `showcase-banner-xe.jpg`; `SEED_VERSION` 9.
+- **Dock/menu active:** chữ/icon trắng trên nền brand (Home icon thay BrandMark trên dock).
+- **Showcase catalog UI:** `/showcase` layout kiểu bộ sưu tập (hero banner ảnh, filter dropdown + sắp xếp, grid card, trust bar); giữ brand tím `#5d5cc4`.
+- **Banner admin:** `StoreSettings.showcaseBannerUrl|Headline|Sub|Badge`; seed mặc định `public/showcase-banner.jpg` / `-xe.jpg`; chỉnh tại `/cai-dat`.
+
 ## 2026-10-22
 
+- **Theme:** giữ brand tím `#5d5cc4` + font Geist/Inter (hoàn nguyên sau thử boutique); layout tổng quan/showcase/kho/đơn vẫn bản mới; `design-language.md`.
 - **Menu mobile:** style SSI/CRM — thẻ user, tab Quản lý/Hỗ trợ, card nhóm + icon tile brand-50.
 - **Thuộc tính v2:** nhóm Đặc điểm / Mô tả / Tiện nghi / Giấy tờ / Thế chấp / Điều khoản (xe + trang phục); UI detail theo section; seed đầy đủ; `SEED_VERSION` 7.
 - **Showcase v2:** `/showcase/[id]` detail + thuộc tính theo lĩnh vực (`attribute-defs`); filter chip + CTA đặt thuê (tham khảo POS ecommerce); brand seed **Dolphin Studio Váy & Vest** / **Showroom thuê xe Dolphin**; Cài đặt xem định nghĩa attr; `SEED_VERSION` 6.

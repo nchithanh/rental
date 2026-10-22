@@ -7,7 +7,7 @@ import "./globals.css";
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export const metadata: Metadata = {
-  title: "Dolphin Studio Thuê",
+  title: "Dolphin Studio Váy & Vest",
   description:
     "Phần mềm quản lý cho thuê trang phục — studio · cọc · nhận trả — Dolphin Software",
   manifest: `${basePath}/manifest.webmanifest`,
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "Studio Thuê",
+    title: "Studio Váy & Vest",
   },
 };
 

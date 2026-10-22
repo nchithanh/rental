@@ -16,7 +16,7 @@ import type {
 } from "@/types";
 
 /** Bump để force re-seed demo khi đổi data. */
-export const SEED_VERSION = "7";
+export const SEED_VERSION = "11";
 
 const ALL_PERMS = {
   "trang-phuc": true,
@@ -89,6 +89,22 @@ export async function ensureSeeded(): Promise<void> {
       : "studio@dolphin-software.io.vn",
     zaloNotifyEnabled: false,
     websiteShowcaseTodo: true,
+    showcaseBannerUrl: isXe
+      ? "/showcase-banner-xe.jpg"
+      : "/showcase-banner.jpg",
+    showcaseHeadline: isXe
+      ? "BỘ SƯU TẬP XE THUÊ"
+      : "BỘ SƯU TẬP VÁY CƯỚI & DỰ TIỆC",
+    showcaseSub: isXe
+      ? "Tiện nghi. Minh bạch. Sẵn sàng lên đường."
+      : "Sang trọng. Thanh lịch. Dành riêng cho bạn.",
+    showcaseBadge: isXe
+      ? "MẪU XE CẬP NHẬT LIÊN TỤC — ĐẶT TRƯỚC ĐỂ ĐƯỢC ƯU TIÊN"
+      : "KIỂU MẪU MỚI CẬP NHẬT LIÊN TỤC — ĐẶT CHỖ TRƯỚC ĐỂ ĐƯỢC ƯU TIÊN",
+    branchName: isXe ? "Showroom Quận 7" : "Studio Quận 1",
+    branches: isXe
+      ? ["Showroom Quận 7", "Showroom Thủ Đức"]
+      : ["Studio Quận 1", "Studio Quận 3"],
   };
 
   const users: User[] = [

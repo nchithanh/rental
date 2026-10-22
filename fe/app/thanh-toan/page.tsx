@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { AppShell } from "@/components/layout/app-shell";
 import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { db } from "@/lib/db";
 import { PAYMENT_KIND_LABEL, PAYMENT_METHOD_LABEL } from "@/lib/labels";
 import { orderBalance } from "@/lib/rental";
@@ -58,25 +59,29 @@ export default function PaymentsPage() {
 
   return (
     <AppShell>
-      <h1 className="mb-1 text-lg font-bold">Thanh toán & cọc</h1>
-      <p className="mb-4 text-sm text-slate-500">
-        Thuê · cọc · phí · hoàn cọc · lịch sử theo đơn
-      </p>
+      <PageHeader
+        title="Thanh toán & cọc"
+        description="Thuê · cọc · phí · hoàn cọc · lịch sử theo đơn"
+      />
 
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Card className="p-4">
-          <p className="text-xs text-slate-500">Còn phải thu (thuê+phí)</p>
-          <p className="text-xl font-bold">{formatVnd(summary.dueRent)}</p>
+          <p className="text-sm text-slate-500">Còn phải thu (thuê+phí)</p>
+          <p className="mt-1 text-lg font-bold tabular-nums sm:text-xl">
+            {formatVnd(summary.dueRent)}
+          </p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs text-slate-500">Cọc đang giữ</p>
-          <p className="text-xl font-bold text-[var(--brand-600)]">
+          <p className="text-sm text-slate-500">Cọc đang giữ</p>
+          <p className="mt-1 text-lg font-bold tabular-nums text-[var(--brand-600)] sm:text-xl">
             {formatVnd(summary.depositHeld)}
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs text-slate-500">Đã thu (thuê+phí)</p>
-          <p className="text-xl font-bold">{formatVnd(summary.collected)}</p>
+          <p className="text-sm text-slate-500">Đã thu (thuê+phí)</p>
+          <p className="mt-1 text-lg font-bold tabular-nums sm:text-xl">
+            {formatVnd(summary.collected)}
+          </p>
         </Card>
       </div>
 

@@ -3,38 +3,61 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { ChevronDown, LogOut } from "lucide-react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { AppShell } from "@/components/layout/app-shell";
 import { db } from "@/lib/db";
 import { getNavGroups, isNavActive, type NavGroup, type NavItem } from "@/lib/nav";
+import { useNavBadges } from "@/lib/nav-badges";
 import { cn } from "@/lib/utils";
-import { useVertical } from "@/lib/vertical";
+import { getVerticalCopy, useVertical } from "@/lib/vertical";
 import { useAuthStore } from "@/stores/auth-store";
 
 type Tab = "main" | "support";
 
 const SUPPORT_HREFS = new Set(["/cham-soc", "/showcase", "/cai-dat"]);
 
-function MenuTile({ item, pathname }: { item: NavItem; pathname: string }) {
+function MenuTile({
+  item,
+  pathname,
+  count,
+}: {
+  item: NavItem;
+  pathname: string;
+  count: number;
+}) {
   const active = isNavActive(item.href, pathname);
   const Icon = item.icon;
   return (
     <Link
       href={item.href}
-      className="group flex min-w-0 flex-col items-center gap-2"
+      className="group relative flex min-w-0 flex-col items-center gap-2 rounded-[12px] px-1 py-2 transition"
     >
       <span
         className={cn(
-          "inline-flex h-12 w-12 items-center justify-center rounded-[12px] transition",
+          "relative inline-flex h-12 w-12 items-center justify-center rounded-[12px] transition",
           active
-            ? "bg-[var(--brand-500)] text-white"
-            : "bg-[var(--brand-50)] text-[var(--brand-600)] group-hover:bg-[var(--brand-100)]",
+            ? "bg-transparent text-[var(--brand-600)]"
+            : "bg-[var(--brand-50)] text-slate-900 group-hover:bg-[var(--brand-100)]",
         )}
       >
-        <Icon size={22} strokeWidth={1.75} />
+        <Icon
+          size={22}
+          strokeWidth={active ? 2.25 : 1.75}
+          className={active ? "text-[var(--brand-600)]" : undefined}
+        />
+        {count > 0 ? (
+          <span className="absolute -top-1 -right-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--brand-500)] px-1 text-[9px] font-bold text-white tabular-nums ring-2 ring-white">
+            {count > 99 ? "99+" : count}
+          </span>
+        ) : null}
       </span>
-      <span className="max-w-full text-center text-xs font-medium leading-tight text-slate-800">
+      <span
+        className={cn(
+          "max-w-full text-center text-xs font-medium leading-tight",
+          active ? "text-[var(--brand-600)]" : "text-slate-900",
+        )}
+      >
         {item.label}
       </span>
     </Link>
@@ -44,20 +67,27 @@ function MenuTile({ item, pathname }: { item: NavItem; pathname: string }) {
 function GroupCard({
   group,
   pathname,
+  badges,
 }: {
   group: NavGroup;
   pathname: string;
+  badges: Record<string, number>;
 }) {
   if (!group.items.length) return null;
   return (
     <section
-      className="rounded-[12px] border border-[var(--border)] bg-white p-4 shadow-sm dark:bg-slate-900"
+      className="rounded-[12px] border border-[var(--border)] bg-white p-4 shadow-sm"
       aria-label={group.label}
     >
-      <h2 className="text-sm font-bold text-slate-900">{group.label}</h2>
+      <h2 className="font-bold">{group.label}</h2>
       <div className="mt-4 grid grid-cols-3 gap-x-2 gap-y-5">
         {group.items.map((item) => (
-          <MenuTile key={item.href} item={item} pathname={pathname} />
+          <MenuTile
+            key={item.href}
+            item={item}
+            pathname={pathname}
+            count={badges[item.href] ?? 0}
+          />
         ))}
       </div>
     </section>
@@ -68,9 +98,11 @@ export function MobileMenuPage() {
   const pathname = usePathname();
   const router = useRouter();
   const vertical = useVertical();
+  const verticalCopy = getVerticalCopy(vertical);
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const settings = useLiveQuery(() => db.settings.get("store"));
+  const badges = useNavBadges();
   const [tab, setTab] = useState<Tab>("main");
 
   const { mainGroups, supportItems } = useMemo(() => {
@@ -97,6 +129,17 @@ export function MobileMenuPage() {
   }, [user, vertical]);
 
   const initial = (user?.name?.trim().charAt(0) || "U").toUpperCase();
+  const studioName = settings?.name ?? "Studio";
+  const branchList =
+    settings?.branches?.length
+      ? settings.branches
+      : [settings?.branchName || studioName].filter(Boolean);
+  const branchName = settings?.branchName || branchList[0] || studioName;
+
+  const setBranch = async (name: string) => {
+    if (!settings || name === settings.branchName) return;
+    await db.settings.put({ ...settings, branchName: name });
+  };
 
   return (
     <AppShell>
@@ -104,21 +147,47 @@ export function MobileMenuPage() {
         {user ? (
           <div className="flex items-center gap-3 rounded-[12px] border border-[var(--border)] bg-white p-4 shadow-sm dark:bg-slate-900">
             <span
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-base font-bold text-white"
-              style={{ background: "var(--brand-500)" }}
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#22c55e] text-lg font-bold text-white"
               aria-hidden
             >
               {initial}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-base font-bold">{user.name}</p>
+              <p className="truncate text-base font-bold tracking-wide text-[var(--brand-700)] uppercase">
+                Dolphin Rental
+              </p>
               <p className="truncate text-xs text-slate-500">
-                {user.role === "owner" ? "Chủ" : "Nhân viên"}
-                {settings?.name ? ` · ${settings.name}` : ""}
+                {verticalCopy.label}
+                {" · "}
+                {user.role === "owner" ? "Chủ studio" : "Nhân viên"}
               </p>
             </div>
           </div>
         ) : null}
+
+        <div className="rounded-[12px] border border-[var(--border)] bg-white p-3 shadow-sm">
+          <p className="mb-1.5 px-1 text-[10px] font-semibold tracking-[0.12em] text-slate-500 uppercase">
+            Chi nhánh
+          </p>
+          <div className="relative">
+            <select
+              aria-label="Chọn chi nhánh"
+              className="w-full appearance-none rounded-[10px] border border-[var(--border)] bg-white py-2.5 pr-9 pl-3 text-sm font-medium text-slate-800 outline-none focus:border-[var(--brand-500)]"
+              value={branchName}
+              onChange={(e) => void setBranch(e.target.value)}
+            >
+              {branchList.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              size={16}
+              className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-slate-400"
+            />
+          </div>
+        </div>
 
         <div
           role="tablist"
@@ -152,7 +221,12 @@ export function MobileMenuPage() {
         {tab === "main" ? (
           <div className="flex flex-col gap-3">
             {mainGroups.map((group) => (
-              <GroupCard key={group.id} group={group} pathname={pathname} />
+              <GroupCard
+                key={group.id}
+                group={group}
+                pathname={pathname}
+                badges={badges}
+              />
             ))}
           </div>
         ) : (
@@ -169,29 +243,23 @@ export function MobileMenuPage() {
                       key={item.href}
                       item={item}
                       pathname={pathname}
+                      count={badges[item.href] ?? 0}
                     />
                   ))}
                 </div>
               </section>
             ) : null}
-
-            <section className="rounded-[12px] border border-[var(--border)] bg-white p-2 shadow-sm dark:bg-slate-900">
-              <button
-                type="button"
-                onClick={() => {
-                  logout();
-                  router.replace("/login");
-                }}
-                className="flex w-full items-center gap-3 rounded-[10px] px-2 py-3 text-left hover:bg-rose-50"
-              >
-                <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] bg-rose-50 text-rose-600">
-                  <LogOut size={20} />
-                </span>
-                <span className="text-sm font-semibold text-rose-600">
-                  Đăng xuất
-                </span>
-              </button>
-            </section>
+            <button
+              type="button"
+              onClick={() => {
+                logout();
+                router.replace("/login");
+              }}
+              className="flex items-center justify-center gap-2 rounded-[12px] border border-[var(--border)] bg-white px-4 py-3 text-sm font-semibold text-rose-600 shadow-sm"
+            >
+              <LogOut size={16} />
+              Đăng xuất
+            </button>
           </div>
         )}
       </div>

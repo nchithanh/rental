@@ -46,6 +46,18 @@ export interface StoreSettings {
   email?: string;
   zaloNotifyEnabled?: boolean;
   websiteShowcaseTodo?: boolean;
+  /** URL ảnh hero `/showcase` (path public hoặc absolute). */
+  showcaseBannerUrl?: string;
+  /** Headline hero trưng bày */
+  showcaseHeadline?: string;
+  /** Dòng phụ dưới headline */
+  showcaseSub?: string;
+  /** Badge nổi trên hero (vd. ưu tiên đặt chỗ) */
+  showcaseBadge?: string;
+  /** Chi nhánh đang chọn (UI demo). */
+  branchName?: string;
+  /** Danh sách chi nhánh demo (select sidebar). */
+  branches?: string[];
 }
 
 export interface User {
