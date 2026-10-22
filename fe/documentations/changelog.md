@@ -2,6 +2,7 @@
 
 ## 2026-10-23
 
+- **CI:** GitHub Actions `.github/workflows/build.yml` — `npm ci` + `npm run build` trên `fe/` (push/PR `main`); cập nhật `deploy.md`.
 - **Typography = POS:** `PageHeader` (`text-xl/2xl` + mô tả `text-sm`); section `font-bold`; KPI `text-lg/xl`; bỏ eyebrow + `font-display text-3xl` trên app pages.
 - **Sidebar POS-style:** DOLPHIN RENTAL + lĩnh vực; Chi nhánh select (`branchName`/`branches`); badge số đơn mở / trả / kho / thu / nhắc; active thanh trái + `brand-50`; `SEED_VERSION` 11.
 - **Trang phục:** ảnh item thấp hơn (`aspect-square` / `5:6`).

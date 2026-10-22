@@ -1,12 +1,12 @@
-# Deploy — Dolphin POS frontend
+# Deploy — Dolphin Rental FE
 
-**Vercel** (Next.js) · repo `nchithanh/pos` · app directory `fe/`.
+**Vercel** (Next.js) · repo `nchithanh/rental` · app directory `fe/`.
 
-Không còn GitHub Pages / static export CI.
+Deploy production: Vercel. CI check: GitHub Actions (build only, không Pages).
 
 ## Vercel (1 lần)
 
-1. [vercel.com](https://vercel.com) → **Add New Project** → Import GitHub `nchithanh/pos`
+1. [vercel.com](https://vercel.com) → **Add New Project** → Import GitHub `nchithanh/rental`
 2. **Root Directory:** `fe`
 3. Framework Preset: **Next.js** (đọc `fe/vercel.json`)
 4. Install / Build: `npm ci` / `npm run build` (mặc định trong `vercel.json`)
@@ -15,30 +15,31 @@ Không còn GitHub Pages / static export CI.
 
 Push `main` sau đó → Vercel auto-deploy (Git Integration).
 
+## GitHub Actions (CI build)
+
+Workflow: `.github/workflows/build.yml`
+
+| | |
+| --- | --- |
+| Trigger | `push` / `pull_request` → `main` |
+| Working dir | `fe/` |
+| Steps | Node 20 · `npm ci` · `npm run build` |
+
+Chỉ kiểm tra build xanh; **không** publish GitHub Pages / artifact static.
+
 ## Build env
 
 | Env | Khi nào |
 | --- | --- |
 | *(trống)* | Production Vercel / `npm run build` — Next.js server, **không** `basePath`, PWA bật (prod) |
-| `GITHUB_PAGES=true` + `GITHUB_PAGES_BASE_PATH` | Chỉ local optional (`npm run build:pages`) — static `out/`; **không** dùng cho Vercel |
-
-`next.config.ts`: `output: "export"` + `basePath` chỉ khi `GITHUB_PAGES=true`.
-
-## URL
-
-| Giai đoạn | URL |
-| --- | --- |
-| Vercel preview / production | `https://<project>.vercel.app/` |
-| Custom domain | `https://<domain>/` |
+| `GITHUB_PAGES=true` + `GITHUB_PAGES_BASE_PATH` | Chỉ local optional (`npm run build:pages`) — static `out/`; **không** dùng cho Vercel / CI |
 
 ## Local
 
 ```bash
 cd fe
-npm run dev          # :3012
+npm run dev          # :3013
 npm run build && npm start
-# optional static artifact (không deploy Vercel):
-npm run build:pages  # → out/
 ```
 
 ## Push
@@ -49,4 +50,4 @@ GIT_SSH_COMMAND='ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes' git push origin
 
 ## Tắt GitHub Pages (1 lần trên GitHub)
 
-Repo **Settings → Pages** → Source: **None** (hoặc bỏ GitHub Actions) để không còn URL `*.github.io/pos`.
+Repo **Settings → Pages** → Source: **None** để không còn URL `*.github.io/...`.
