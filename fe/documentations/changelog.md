@@ -2,7 +2,8 @@
 
 ## 2026-10-23
 
-- **Deploy Pages:** gộp vào `.github/workflows/build.yml` (**Build and deploy Pages**) — `build:pages` → artifact → `deploy-pages`; bỏ `deploy-pages.yml` riêng. PR vẫn `npm run build`. URL `https://nchithanh.github.io/rental/`. `generateStaticParams` (layout) cho `[id]` + `lib/pages-static-params.ts`.
+- **Pages basePath:** bỏ `/rental` — custom domain `rental.dolphin-software.io.vn` phục vụ ở root; asset `/_next/...` (tránh 404 `/rental/_next/...`).
+- **Deploy Pages:** gộp vào `.github/workflows/build.yml` (**Build and deploy Pages**) — `build:pages` → artifact → `deploy-pages`; bỏ `deploy-pages.yml` riêng. PR vẫn `npm run build`. `generateStaticParams` (layout) cho `[id]` + `lib/pages-static-params.ts`.
 - **Typography = POS:** `PageHeader` (`text-xl/2xl` + mô tả `text-sm`); section `font-bold`; KPI `text-lg/xl`; bỏ eyebrow + `font-display text-3xl` trên app pages.
 - **Sidebar POS-style:** DOLPHIN RENTAL + lĩnh vực; Chi nhánh select (`branchName`/`branches`); badge số đơn mở / trả / kho / thu / nhắc; active thanh trái + `brand-50`; `SEED_VERSION` 11.
 - **Trang phục:** ảnh item thấp hơn (`aspect-square` / `5:6`).

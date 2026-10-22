@@ -45,7 +45,6 @@ jobs:
         run: npm run build:pages
         env:
           GITHUB_PAGES: "true"
-          GITHUB_PAGES_BASE_PATH: /rental
 
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request'
