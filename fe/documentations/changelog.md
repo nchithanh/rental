@@ -2,6 +2,7 @@
 
 ## 2026-10-22
 
+- **Menu mobile:** style SSI/CRM — thẻ user, tab Quản lý/Hỗ trợ, card nhóm + icon tile brand-50.
 - **Thuộc tính v2:** nhóm Đặc điểm / Mô tả / Tiện nghi / Giấy tờ / Thế chấp / Điều khoản (xe + trang phục); UI detail theo section; seed đầy đủ; `SEED_VERSION` 7.
 - **Showcase v2:** `/showcase/[id]` detail + thuộc tính theo lĩnh vực (`attribute-defs`); filter chip + CTA đặt thuê (tham khảo POS ecommerce); brand seed **Dolphin Studio Váy & Vest** / **Showroom thuê xe Dolphin**; Cài đặt xem định nghĩa attr; `SEED_VERSION` 6.
 - **Seed v5 (thuê xe):** 48 xe từ listing marketplace (ảnh CDN + giá/ngày, số chỗ, hộp số, nhiên liệu) trong `seed-vehicles.ts`; bump `SEED_VERSION`.
