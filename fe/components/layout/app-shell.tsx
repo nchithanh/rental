@@ -26,19 +26,25 @@ function showcaseUrl() {
 async function shareShowcase() {
   const url = showcaseUrl();
   const title = "Website trưng bày — Studio Thuê";
+  const data: ShareData = { title, text: title, url };
+
+  if (typeof navigator === "undefined" || typeof navigator.share !== "function") {
+    notify.info("Trình duyệt không hỗ trợ sheet chia sẻ");
+    return;
+  }
+  if (
+    typeof navigator.canShare === "function" &&
+    !navigator.canShare(data)
+  ) {
+    notify.info("Trình duyệt không hỗ trợ chia sẻ link này");
+    return;
+  }
+
   try {
-    if (typeof navigator !== "undefined" && navigator.share) {
-      await navigator.share({ title, url, text: title });
-      return;
-    }
+    await navigator.share(data);
   } catch (e) {
     if (e instanceof DOMException && e.name === "AbortError") return;
-  }
-  try {
-    await navigator.clipboard.writeText(url);
-    notify.success("Đã copy link trưng bày");
-  } catch {
-    notify.info(url);
+    notify.fromError(e, "Không mở được sheet chia sẻ");
   }
 }
 

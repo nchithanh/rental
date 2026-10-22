@@ -16,7 +16,7 @@ import type {
 } from "@/types";
 
 /** Bump để force re-seed demo khi đổi data. */
-export const SEED_VERSION = "4";
+export const SEED_VERSION = "5";
 
 const ALL_PERMS = {
   "trang-phuc": true,

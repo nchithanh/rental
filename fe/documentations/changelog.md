@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+- **Seed v5 (thuê xe):** 48 xe từ listing marketplace (ảnh CDN + giá/ngày, số chỗ, hộp số, nhiên liệu) trong `seed-vehicles.ts`; bump `SEED_VERSION`.
+- **Header CTA chia sẻ:** chỉ mở Web Share sheet (`navigator.share` / `canShare`); không fallback copy.
 - **Repo:** remote `nchithanh/rental`; vertical **trang-phuc | thue-xe** (DB tách, seed xe, picker login/cài đặt); header bỏ switch lang; FAB đơn thuê dùng `ClipboardList`.
 - **Header / dock:** CTA **Chia sẻ trưng bày** (`/showcase` · Web Share hoặc copy link); nhãn dock mobile «Đơn thuê».
 - **Seed v3:** 46 trang phục marketplace (ảnh CDN + giá k/tr) trong `seed-garments.ts`; đơn/payment map lại theo giá mới.
