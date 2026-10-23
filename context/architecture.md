@@ -26,6 +26,7 @@
 | `/cai-dat` | Studio + chỉnh banner trưng bày |
 | `/cai-dat` | Cài đặt |
 | `/login`, `/menu` | Auth · menu mobile |
+| Search AI (shell) | FAB + Command Palette (Ctrl+K); mobile scroll-hide với bottom dock |
 
 ## Logic thuê
 

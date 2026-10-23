@@ -1,12 +1,20 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronDown, ClipboardList, LayoutGrid, LogOut, Share2 } from "lucide-react";
+import {
+  ChevronDown,
+  ClipboardList,
+  LayoutGrid,
+  LogOut,
+  Share2,
+  Sparkles,
+} from "lucide-react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
+import { CommandPalette } from "@/components/layout/command-palette";
 import { OfflineBanner } from "@/components/layout/offline-banner";
 import { PageTransition } from "@/components/layout/page-transition";
 import { db } from "@/lib/db";
@@ -67,6 +75,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const logout = useAuthStore((s) => s.logout);
   const settings = useLiveQuery(() => db.settings.get("store"));
   const badges = useNavBadges();
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [navHidden, setNavHidden] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
+
+  /** Mobile: scroll xuống ẩn dock + Search AI; scroll lên hiện lại */
+  useEffect(() => {
+    setNavHidden(false);
+    const el = mainRef.current;
+    if (!el) return;
+    let last = el.scrollTop;
+    const onScroll = () => {
+      const y = el.scrollTop;
+      const delta = y - last;
+      last = y;
+      if (y < 12) {
+        setNavHidden(false);
+        return;
+      }
+      if (delta > 8) setNavHidden(true);
+      else if (delta < -8) setNavHidden(false);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [path]);
 
   const groups = useMemo(() => {
     return getNavGroups(vertical)
@@ -243,16 +275,39 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Button>
         </header>
 
-        <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 py-5 pb-36 sm:px-6 lg:pb-8">
+        <main
+          ref={mainRef}
+          className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 py-5 pb-36 sm:px-6 lg:pb-8"
+        >
           <PageTransition>{children}</PageTransition>
         </main>
       </div>
 
-      <nav
-        id="mobile-bottom-nav"
-        aria-label="Điều hướng"
-        className="pointer-events-none fixed inset-x-3 z-40 bottom-[max(1.35rem,calc(env(safe-area-inset-bottom)+0.6rem))] lg:hidden"
+      {/* Mobile: dock + Search AI chung một khối → scroll ẩn/hiện cùng nhau */}
+      <div
+        className={cn(
+          "pos-mobile-chrome fixed inset-x-0 z-40 lg:hidden",
+          "bottom-[max(1.35rem,calc(env(safe-area-inset-bottom)+0.6rem))]",
+          navHidden && "is-hidden",
+        )}
       >
+        {!paletteOpen ? (
+          <button
+            type="button"
+            className="pos-cmd-fab pointer-events-auto absolute right-5 bottom-[calc(3.85rem+0.65rem)] z-50 inline-flex"
+            aria-label="Search AI — tìm nhanh"
+            title="Search AI — tìm nhanh (Ctrl+K)"
+            onClick={() => setPaletteOpen(true)}
+          >
+            <Sparkles size={20} strokeWidth={2.25} aria-hidden />
+          </button>
+        ) : null}
+
+        <nav
+          id="mobile-bottom-nav"
+          aria-label="Điều hướng"
+          className="pointer-events-none relative px-3"
+        >
         <div className="pointer-events-auto relative mx-auto max-w-lg pt-9">
           {mobileDock.orders ? (
             <Link
@@ -400,7 +455,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
-      </nav>
+        </nav>
+      </div>
+
+      {!paletteOpen ? (
+        <button
+          type="button"
+          className="pos-cmd-fab fixed right-5 bottom-5 z-50 hidden lg:inline-flex"
+          aria-label="Search AI — tìm nhanh"
+          title="Search AI — tìm nhanh (Ctrl+K)"
+          onClick={() => setPaletteOpen(true)}
+        >
+          <Sparkles size={20} strokeWidth={2.25} aria-hidden />
+        </button>
+      ) : null}
+
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
     </div>
   );
 }

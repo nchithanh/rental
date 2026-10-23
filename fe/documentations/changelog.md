@@ -2,6 +2,7 @@
 
 ## 2026-10-23
 
+- **Search AI:** Command Palette (Ask Dolphin) + FAB Sparkles; mobile modal giữa màn; scroll ẩn/hiện cùng bottom dock; không auto bàn phím; Ctrl+K desktop. Tìm trang / thao tác / kho thuê / khách / đơn.
 - **Pages basePath:** bỏ `/rental` — custom domain `rental.dolphin-software.io.vn` phục vụ ở root; asset `/_next/...` (tránh 404 `/rental/_next/...`).
 - **Deploy Pages:** gộp vào `.github/workflows/build.yml` (**Build and deploy Pages**) — `build:pages` → artifact → `deploy-pages`; bỏ `deploy-pages.yml` riêng. PR vẫn `npm run build`. `generateStaticParams` (layout) cho `[id]` + `lib/pages-static-params.ts`.
 - **Typography = POS:** `PageHeader` (`text-xl/2xl` + mô tả `text-sm`); section `font-bold`; KPI `text-lg/xl`; bỏ eyebrow + `font-display text-3xl` trên app pages.

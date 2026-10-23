@@ -16,4 +16,6 @@ Login demo: PIN **0000** (chủ) · **1111** (NV).
 
 Trang phục · Đơn thuê · Trả đồ · Khách · Thanh toán & cọc · Báo cáo · Chăm sóc (nhắc local) · Cài đặt.
 
+**Search AI:** FAB góc phải dưới (mobile chung khối bottom dock — scroll ẩn/hiện cùng dock) → Command Palette; desktop Ctrl+K.
+
 Chi tiết route: `pages.md`. Domain: `../context/architecture.md`.
